@@ -1,0 +1,32 @@
+{
+  "name": "mankai-server-api",
+  "version": "1.0.0",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "prisma migrate deploy && node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.1.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.12.0",
+    "@types/sharp": "^0.32.0",
+    "bcryptjs": "^3.0.2",
+    "hyper-express": "^6.17.3",
+    "jsonwebtoken": "^9.0.2",
+    "live-directory": "^3.0.3",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
+    "prisma": "^6.12.0",
+    "sharp": "^0.34.5"
+  }
+}

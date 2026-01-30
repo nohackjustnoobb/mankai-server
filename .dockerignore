@@ -1,0 +1,6 @@
+db.sqlite3
+node_modules
+dist
+static
+.env
+data

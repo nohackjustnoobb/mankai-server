@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  mankai-server:
+    container_name: mankai-server
+    build: .
+    ports:
+      - 3000:3000
+    volumes:
+      - ./data:/app/data
+    environment:
+      - JWT_ACCESS_SECRET=secret_access
+      - JWT_REFRESH_SECRET=secret_refresh
+      - ADMIN_EMAIL=admin@example.com
+      - ADMIN_PASSWORD=admin_password
+      - ENABLE_AUTH=true # if false, everyone can access without a user account
+    restart: unless-stopped
