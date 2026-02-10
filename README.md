@@ -1,6 +1,6 @@
 # Mankai Server
 
-Mankai Server is a sample implementation of [Mankai API Specification](api.md) with user and manga management features.
+Mankai Server is a sample implementation of [Mankai API Specification](doc/api.md) with user and manga management features.
 
 ## Getting Started
 

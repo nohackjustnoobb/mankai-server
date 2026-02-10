@@ -10,6 +10,7 @@ import { hashPassword, verifyPassword } from "./routes/auth";
 import { setupMangaEndpoints } from "./routes/manga";
 import { setupSearchEndpoints } from "./routes/search";
 import { setupSuggestionEndpoints } from "./routes/suggestion";
+import { setupEditorEndpoints } from "./routes/editor";
 import packageJson from "../package.json";
 
 const server = new HyperExpress.Server({
@@ -116,6 +117,7 @@ server.get("/api", (_, response) => {
   response.json({
     id: "mankai-server",
     authenticationEnabled: process.env.ENABLE_AUTH !== "false",
+    editorEnabled: true,
     name: "Mankai Server",
     version: packageJson.version,
     description:
@@ -154,6 +156,7 @@ setupAdminRoutes(server);
 setupMangaEndpoints(server);
 setupSearchEndpoints(server);
 setupSuggestionEndpoints(server);
+setupEditorEndpoints(server);
 
 async function setupAdminUser() {
   const email = process.env.ADMIN_EMAIL;

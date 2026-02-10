@@ -1,6 +1,6 @@
 # Mankai API Specification
 
-To integrate your server with [mankai](https://github.com/nohackjustnoobb/mankai), it must follow this API specification.
+To integrate your server with [mankai](https://github.com/nohackjustnoobb/mankai), it must follow this API specification. If you want to make your server compatible with the [mankai](https://github.com/nohackjustnoobb/mankai) in-app editor, you must also follow the [Mankai Editor API Specification](editor-api.md).
 
 ### Server Information
 
@@ -14,6 +14,7 @@ Retrieve information about the server.
 interface ServerInfoResponse {
   id: string;
   authenticationEnabled: boolean;
+  editorEnabled?: boolean; // default: false
   name?: string;
   version?: string;
   description?: string;
@@ -56,14 +57,6 @@ interface LoginResponse {
 }
 ```
 
-**Response Body (4xx Error):**
-
-```ts
-interface LoginErrorResponse {
-  error: string;
-}
-```
-
 #### `POST` `/auth/refresh`
 
 **Request Parameters:** None
@@ -82,14 +75,6 @@ interface RefreshRequest {
 interface RefreshResponse {
   message: string;
   accessToken: string;
-}
-```
-
-**Response Body (4xx Error):**
-
-```ts
-interface RefreshErrorResponse {
-  error: string;
 }
 ```
 
@@ -133,14 +118,6 @@ interface Manga {
 type MangaListResponse = Manga[];
 ```
 
-**Response Body (4xx Error):**
-
-```ts
-interface MangaListErrorResponse {
-  error: string;
-}
-```
-
 #### `POST` `/manga`
 
 Retrieve details for a specific list of manga IDs.
@@ -177,14 +154,6 @@ interface Manga {
 }
 
 type MangaListResponse = Manga[];
-```
-
-**Response Body (4xx Error):**
-
-```ts
-interface MangaErrorResponse {
-  error: string;
-}
 ```
 
 #### `GET` `/manga/:id`
@@ -246,14 +215,6 @@ interface MangaResponse {
 }
 ```
 
-**Response Body (4xx Error):**
-
-```ts
-interface MangaErrorResponse {
-  error: string;
-}
-```
-
 #### `GET` `/manga/:id/chapter/:chapterId`
 
 Retrieve pages for a specific chapter.
@@ -265,14 +226,6 @@ Retrieve pages for a specific chapter.
 ```ts
 // An array of URLs (absolute or relative to base URL)
 type ChapterResponse = string[];
-```
-
-**Response Body (4xx Error):**
-
-```ts
-interface ChapterErrorResponse {
-  error: string;
-}
 ```
 
 ### Search
@@ -314,14 +267,6 @@ interface Manga {
 type SearchResponse = Manga[];
 ```
 
-**Response Body (4xx Error):**
-
-```ts
-interface SearchErrorResponse {
-  error: string;
-}
-```
-
 ### Suggestion
 
 #### `GET` `/suggestion`
@@ -338,12 +283,4 @@ Get search suggestions based on a query.
 
 ```ts
 type SuggestionResponse = string[]; // An array of manga titles
-```
-
-**Response Body (4xx Error):**
-
-```ts
-interface SuggestionErrorResponse {
-  error: string;
-}
 ```
