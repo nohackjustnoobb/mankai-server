@@ -194,6 +194,12 @@ enum Status {
   Ended = 2,
 }
 
+enum ReadingDirection {
+  LeftToRight = 1,
+  RightToLeft = 2,
+  Vertical = 3,
+}
+
 interface Chapter {
   id: string;
   title?: string;
@@ -205,6 +211,7 @@ interface MangaResponse {
   title?: string;
   cover?: string; // URL (absolute or relative to base URL)
   status?: Status;
+  readingDirection?: ReadingDirection;
   latestChapter?: Chapter;
   description?: string;
   updatedAt?: number;
