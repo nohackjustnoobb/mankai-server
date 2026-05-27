@@ -68,9 +68,14 @@ server.get("/static/*", (request, response) => {
 
   const fileParts = file.path.split(".");
   const extension = fileParts[fileParts.length - 1];
+  response.status(200).type(extension);
 
-  const content = file.content;
-  return response.status(200).type(extension).send(content);
+  if (file.cached) {
+    return response.send(file.content);
+  } else {
+    const readable = file.stream();
+    return readable.pipe(response);
+  }
 });
 
 server.get("/", (_, response) => {
@@ -107,9 +112,14 @@ server.get("/api/images/*", (request, response) => {
 
   const fileParts = file.path.split(".");
   const extension = fileParts[fileParts.length - 1];
+  response.status(200).type(extension);
 
-  const content = file.content;
-  return response.status(200).type(extension).send(content);
+  if (file.cached) {
+    return response.send(file.content);
+  } else {
+    const readable = file.stream();
+    return readable.pipe(response);
+  }
 });
 
 // Api endpoint
