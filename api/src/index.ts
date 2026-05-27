@@ -24,6 +24,7 @@ server.use("/api", (request, response, next) => {
     request.path == "/api/auth/login" ||
     request.path == "/api/auth/refresh" ||
     request.path == "/api" ||
+    request.path == "/api/" ||
     process.env.ENABLE_AUTH === "false"
   ) {
     return next();
