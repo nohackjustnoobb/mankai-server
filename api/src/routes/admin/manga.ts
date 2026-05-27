@@ -1,4 +1,5 @@
 import HyperExpress from "hyper-express";
+import fs from "fs/promises";
 import prisma from "../../utils/prisma";
 import sharp from "sharp";
 import { cleanupOrphanImages } from "../../utils/cleanup";
@@ -346,28 +347,36 @@ function setupAdminMangaRoutes(server: HyperExpress.Server) {
           return response.status(400).json({ error: "Invalid images data" });
         }
 
-        const createdImages = [];
+        const lastImage = await prisma.image.findFirst({
+          where: { chapterId: Number(chapterId) },
+          orderBy: { sequence: "desc" },
+        });
+        let nextSequence = (lastImage?.sequence ?? 0) + 1;
 
-        await prisma.$transaction(async (tx) => {
-          const lastImage = await tx.image.findFirst({
-            where: { chapterId: Number(chapterId) },
-            orderBy: { sequence: "desc" },
-          });
-          let nextSequence = (lastImage?.sequence ?? 0) + 1;
+        const pendingImages = await Promise.all(
+          images.map(async (base64Image) => {
+            const sequence = nextSequence++;
+            const tempPath = `./data/images/tmp_${crypto.randomUUID()}.webp`;
+            const buffer = Buffer.from(base64Image, "base64");
+            await sharp(buffer).webp().toFile(tempPath);
+            return { sequence, path: tempPath };
+          }),
+        );
 
-          for (const base64Image of images) {
+        const createdImages = await prisma.$transaction(async (tx) => {
+          const result = [];
+          for (const pending of pendingImages) {
             const image = await tx.image.create({
               data: {
                 chapterId: Number(chapterId),
-                sequence: nextSequence++,
+                sequence: pending.sequence,
               },
             });
-
-            const buffer = Buffer.from(base64Image, "base64");
-            await sharp(buffer).webp().toFile(`./data/images/${image.id}.webp`);
-
-            createdImages.push(image);
+            const finalPath = `./data/images/${image.id}.webp`;
+            await fs.rename(pending.path, finalPath);
+            result.push(image);
           }
+          return result;
         });
 
         response.status(201).json(createdImages);

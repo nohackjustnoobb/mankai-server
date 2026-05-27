@@ -125,7 +125,6 @@ server.get("/api", (_, response) => {
     authors: ["Travis XU"],
     repository: "https://github.com/nohackjustnoobb/mankai-server",
     availableGenres: [
-      "all",
       "action",
       "romance",
       "yuri",
