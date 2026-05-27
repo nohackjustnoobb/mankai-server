@@ -124,39 +124,45 @@ server.get("/api/images/*", (request, response) => {
 });
 
 // Api endpoint
+const apiInfo = {
+  id: "mankai-server",
+  authenticationEnabled: process.env.ENABLE_AUTH !== "false",
+  editorEnabled: true,
+  name: "Mankai Server",
+  version: packageJson.version,
+  description:
+    "Official Implementation for Showcasing the Mankai HttpPlugin API Specification",
+  authors: ["Travis XU"],
+  repository: "https://github.com/nohackjustnoobb/mankai-server",
+  availableGenres: [
+    "action",
+    "romance",
+    "yuri",
+    "boysLove",
+    "schoolLife",
+    "adventure",
+    "harem",
+    "speculativeFiction",
+    "war",
+    "suspense",
+    "fanFiction",
+    "comedy",
+    "magic",
+    "horror",
+    "historical",
+    "sports",
+    "mature",
+    "mecha",
+    "otokonoko",
+  ],
+};
+
 server.get("/api", (_, response) => {
-  response.json({
-    id: "mankai-server",
-    authenticationEnabled: process.env.ENABLE_AUTH !== "false",
-    editorEnabled: true,
-    name: "Mankai Server",
-    version: packageJson.version,
-    description:
-      "Official Implementation for Showcasing the Mankai HttpPlugin API Specification",
-    authors: ["Travis XU"],
-    repository: "https://github.com/nohackjustnoobb/mankai-server",
-    availableGenres: [
-      "action",
-      "romance",
-      "yuri",
-      "boysLove",
-      "schoolLife",
-      "adventure",
-      "harem",
-      "speculativeFiction",
-      "war",
-      "suspense",
-      "fanFiction",
-      "comedy",
-      "magic",
-      "horror",
-      "historical",
-      "sports",
-      "mature",
-      "mecha",
-      "otokonoko",
-    ],
-  });
+  response.json(apiInfo);
+});
+
+server.get("/api/", (_, response) => {
+  response.json(apiInfo);
 });
 
 // Api endpoint
