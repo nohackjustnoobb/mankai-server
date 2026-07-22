@@ -1,0 +1,91 @@
+.overlay {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 24rem;
+  pointer-events: none;
+
+  .notification {
+    pointer-events: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.75rem 0.875rem;
+    background-color: var(--sub-background-color);
+    border-radius: 0.5rem;
+    animation: slideIn 0.3s ease;
+    backdrop-filter: blur(5rem);
+
+    &.success {
+      --accent: var(--success-color);
+      background-color: var(--success-background-color);
+    }
+
+    &.failed {
+      --accent: var(--error-color);
+      background-color: var(--error-background-color);
+    }
+
+    &.warning {
+      --accent: var(--warning-color);
+      background-color: var(--warning-background-color);
+    }
+
+    .icon {
+      flex-shrink: 0;
+      color: var(--accent);
+    }
+
+    .body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+
+      .title {
+        font-size: var(--font-size-md);
+        font-weight: bold;
+        color: var(--text-color);
+      }
+
+      .message {
+        margin: 0;
+        font-size: var(--font-size-sm);
+        color: var(--text-color);
+        word-break: break-word;
+      }
+    }
+
+    .close {
+      flex-shrink: 0;
+      width: auto;
+      padding: 0.125rem;
+      background-color: transparent;
+      color: var(--sub-text-color);
+      border: none;
+      transition: color 0.15s ease;
+
+      &:hover {
+        background-color: transparent;
+        color: var(--text-color);
+      }
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

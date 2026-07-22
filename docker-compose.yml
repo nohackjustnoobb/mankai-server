@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg18
+    container_name: mankai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mankai
+      POSTGRES_PASSWORD: mankai
+      POSTGRES_DB: mankai
+    volumes:
+      - ./data/postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mankai -d mankai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: mankai-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      USE_PGLITE: "0"
+      DATABASE_URL: postgresql://mankai:mankai@postgres:5432/mankai
+      SESSION_SECRET: changeme123-make-sure-it-is-at-least-32-characters
+      JWT_SECRET: changeme123-make-sure-it-is-at-least-32-characters
+      ADMIN_EMAIL: admin@mankai.local
+      ADMIN_PASSWORD: changeme123
+      # Useful when behind a reverse proxy
+      # BASE_API_URL: https://api.example.app
+      # It will use more memory but more accurate
+      # EMBEDDING_QUANTIZED: "0"
+      # Only when HTTPS is available for dashboards, API requests don't use cookies
+      # FORCE_SECURE_COOKIE: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy

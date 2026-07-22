@@ -1,0 +1,12 @@
+.themeToggle {
+  color: var(--text-color);
+  background: transparent;
+  width: auto;
+  padding: 0;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--primary-color);
+    background: transparent;
+  }
+}

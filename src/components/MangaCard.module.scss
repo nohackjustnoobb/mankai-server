@@ -1,0 +1,109 @@
+.link {
+  display: flex;
+  text-decoration: none;
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  .card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--sub-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      transform 0.15s ease;
+
+    &:hover {
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+
+      .cover img {
+        transform: scale(1.04);
+      }
+    }
+
+    .cover {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      background-color: var(--input-background-color);
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s ease;
+      }
+
+      .placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sub-text-color);
+      }
+
+      .statusBadge {
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        padding: 0.125rem 0.5rem;
+        font-size: var(--font-size-sm);
+        font-weight: bold;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.6);
+        border-radius: 1rem;
+      }
+    }
+
+    .body {
+      padding: 0.625rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .title {
+        margin: 0;
+        font-size: var(--font-size-base);
+        font-weight: bold;
+        color: var(--text-color);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .authors {
+        margin: 0;
+        font-size: var(--font-size-sm);
+        color: var(--sub-text-color);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .genres {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        margin-top: 0.25rem;
+
+        .genre {
+          font-size: var(--font-size-sm);
+          color: var(--sub-text-color);
+          background-color: var(--input-background-color);
+          border-radius: 1rem;
+          padding: 0.0625rem 0.5rem;
+        }
+      }
+    }
+  }
+}

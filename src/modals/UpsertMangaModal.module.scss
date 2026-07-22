@@ -1,0 +1,115 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .label {
+    font-size: var(--font-size-sm);
+    color: var(--sub-text-color);
+    font-weight: bold;
+  }
+
+  .genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+
+    .genreChip {
+      width: auto;
+      padding: 0.25rem 0.625rem;
+      font-size: var(--font-size-sm);
+      font-weight: normal;
+      color: var(--text-color);
+      background-color: var(--input-background-color);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+
+      &:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+      }
+
+      &.genreChipActive {
+        color: var(--background-color);
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+
+        &:hover {
+          color: var(--background-color);
+        }
+      }
+    }
+  }
+
+  .cover {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .coverInput {
+      display: none;
+    }
+
+    .coverPicker {
+      width: 100%;
+      padding: 1.5rem;
+      font-size: var(--font-size-md);
+      font-weight: normal;
+      color: var(--sub-text-color);
+      background-color: var(--input-background-color);
+      border: 1px dashed var(--border-color);
+      border-radius: 0.5rem;
+      flex-direction: column;
+      transition:
+        border-color 0.15s ease,
+        color 0.15s ease;
+
+      &:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+      }
+    }
+
+    .coverPreview {
+      position: relative;
+      align-self: flex-start;
+      max-width: 12rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      overflow: hidden;
+
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .coverRemove {
+        position: absolute;
+        top: 0.375rem;
+        right: 0.375rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.6);
+        border-radius: 1rem;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+          background-color: var(--error-color);
+        }
+      }
+    }
+  }
+}

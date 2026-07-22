@@ -1,0 +1,13 @@
+diff --git a/bin.cjs b/bin.cjs
+index 24e49917fb4adc172cbb2c411a00b6ad40b54c26..4cb4200587ab0e4259c79fed9de1b57e7406c90a 100755
+--- a/bin.cjs
++++ b/bin.cjs
+@@ -86874,7 +86874,7 @@ var init_postgres = __esmMin((() => {
+ 		objectType({
+ 			driver: literalType("pglite"),
+ 			url: stringType().min(1)
+-		})
++    }).passthrough()
+ 	]);
+ 	printConfigConnectionIssues$2 = (options) => {
+ 		if (options.driver === "aws-data-api") throw new ConfigConnectionCliError("aws-data-api", [

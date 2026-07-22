@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg18
+    container_name: mankai-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: mankai
+      POSTGRES_PASSWORD: mankai
+      POSTGRES_DB: mankai
+    volumes:
+      - ./data/postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mankai -d mankai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

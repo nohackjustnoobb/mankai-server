@@ -1,0 +1,11 @@
+.message {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  line-height: 1.5;
+  word-break: break-word;
+
+  strong {
+    font-weight: bold;
+  }
+}
