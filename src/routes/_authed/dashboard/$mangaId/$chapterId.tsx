@@ -67,10 +67,6 @@ function ChapterView() {
   const [showArrangeImages, setShowArrangeImages] = useState(false);
   const [deleteImageId, setDeleteImageId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<{
-    current: number;
-    total: number;
-  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const chapterTitle = chapter.title?.trim() || "Untitled chapter";
@@ -147,43 +143,52 @@ function ChapterView() {
     if (files.length === 0) return;
 
     setUploading(true);
-    let success = 0;
-    let failed = 0;
-    let lastError: string | null = null;
-    for (let i = 0; i < files.length; i++) {
-      setUploadProgress({ current: i + 1, total: files.length });
-      try {
-        const base64 = await fileToBase64(files[i]);
-        const result = await createChapterImage({
-          data: { chapterId: chapter.id, image: base64 },
-        });
-        if (result.ok) {
-          success++;
-        } else {
-          failed++;
-          lastError = result.error;
-        }
-      } catch (err) {
-        console.error(err);
-        failed++;
-      }
-    }
-    setUploading(false);
-    setUploadProgress(null);
 
-    if (success > 0 && failed === 0) {
-      notify.success(`Added ${success} ${success === 1 ? "image" : "images"}.`);
-      window.dispatchEvent(new CustomEvent(MANGA_UPDATED_EVENT));
-    } else if (success > 0 && failed > 0) {
-      notify.warning(`Added ${success}, ${failed} failed.`);
-      window.dispatchEvent(new CustomEvent(MANGA_UPDATED_EVENT));
-    } else {
-      notify.failed(
-        lastError
-          ? `No images were added: ${lastError}`
-          : "No images were added.",
-        { title: "Upload failed" },
-      );
+    try {
+      const base64Images = await Promise.all(files.map(fileToBase64));
+
+      const result = await createChapterImage({
+        data: { chapterId: chapter.id, images: base64Images },
+      });
+
+      if (result.ok) {
+        notify.success(`Added ${result.results.length} images.`);
+        window.dispatchEvent(new CustomEvent(MANGA_UPDATED_EVENT));
+        return;
+      }
+
+      const partial = "results" in result ? result.results : null;
+      if (partial) {
+        const success = partial.filter((r) => r.ok).length;
+        const failed = partial.length - success;
+        if (success > 0) {
+          notify.warning(`Added ${success}, ${failed} failed.`);
+          window.dispatchEvent(new CustomEvent(MANGA_UPDATED_EVENT));
+        } else {
+          const firstFailed = partial.find(
+            (r): r is { ok: false; error: string } => !r.ok,
+          );
+          const firstError = firstFailed?.error ?? null;
+          notify.failed(
+            firstError
+              ? `No images were added: ${firstError}`
+              : "No images were added.",
+            { title: "Upload failed" },
+          );
+        }
+        return;
+      }
+
+      if ("error" in result && result.error) {
+        notify.failed(result.error, { title: "Upload failed" });
+      }
+    } catch (err) {
+      console.error(err);
+      notify.failed("Could not upload images. Please try again.", {
+        title: "Error",
+      });
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -248,11 +253,7 @@ function ChapterView() {
       </div>
 
       <section className={styles.pages}>
-        {uploadProgress && (
-          <p className={styles.progress}>
-            Uploading {uploadProgress.current} of {uploadProgress.total}…
-          </p>
-        )}
+        {uploading && <p className={styles.progress}>Uploading…</p>}
 
         {images.length === 0 && !canManage ? (
           <p className={styles.pagesEmpty}>No pages yet.</p>

@@ -1148,16 +1148,20 @@ export const getChapterFn = createServerFn({ method: "GET" })
 
 // ---------- Create Chapter Image ----------
 
-export type CreateChapterImageInput = {
+export type CreateChapterImagesInput = {
   chapterId: string;
-  image: string;
+  images: string[];
 };
 
-export type CreateChapterImageResult =
+export type CreateChapterImageItemResult =
   { ok: true; id: string; sequence: number } | { ok: false; error: string };
 
+export type CreateChapterImagesResult =
+  | { ok: true; results: CreateChapterImageItemResult[] }
+  | { ok: false; error: string };
+
 export const createChapterImageFn = createServerFn({ method: "POST" })
-  .validator((data: CreateChapterImageInput) => data)
+  .validator((data: CreateChapterImagesInput) => data)
   .handler(async ({ data }) => {
     // Check session
     const session = await useAppSession();
@@ -1202,51 +1206,83 @@ export const createChapterImageFn = createServerFn({ method: "POST" })
       };
     }
 
-    const base64 = data.image?.trim();
-    if (!base64) {
-      return { ok: false, error: "Image data is required" };
+    if (!Array.isArray(data.images) || data.images.length === 0) {
+      return { ok: false, error: "At least one image is required" };
     }
 
-    let imageBytes: Buffer;
-    try {
-      imageBytes = Buffer.from(base64, "base64");
-    } catch {
-      return { ok: false, error: "Invalid image data" };
-    }
+    type Prepared =
+      { ok: true; id: string; bytes: Buffer } | { ok: false; error: string };
+    const prepared: Prepared[] = await Promise.all(
+      data.images.map(async (raw) => {
+        const base64 = raw?.trim();
+        if (!base64) {
+          return { ok: false, error: "Image data is required" } as const;
+        }
 
-    if (imageBytes.length > MAX_CHAPTER_IMAGE_BYTES) {
+        let bytes: Buffer;
+        try {
+          bytes = Buffer.from(base64, "base64");
+        } catch {
+          return { ok: false, error: "Invalid image data" } as const;
+        }
+
+        if (bytes.length > MAX_CHAPTER_IMAGE_BYTES) {
+          return {
+            ok: false,
+            error: `Image must be smaller than ${
+              MAX_CHAPTER_IMAGE_BYTES / (1024 * 1024)
+            } MB`,
+          } as const;
+        }
+
+        const id = crypto.randomUUID();
+        try {
+          const webpBytes = await new Bun.Image(bytes)
+            .webp({ lossless: true })
+            .bytes();
+          await Bun.write(`${CHAPTER_IMAGES_DIR}/${id}.webp`, webpBytes);
+        } catch (err) {
+          console.error("Failed to encode/write chapter image:", err);
+          return { ok: false, error: "Failed to save image" } as const;
+        }
+
+        return { ok: true, id, bytes } as const;
+      }),
+    );
+
+    const writtenPaths = prepared
+      .filter((p): p is { ok: true; id: string; bytes: Buffer } => p.ok)
+      .map((p) => `${CHAPTER_IMAGES_DIR}/${p.id}.webp`);
+
+    const readyToInsert = prepared.filter(
+      (p): p is { ok: true; id: string; bytes: Buffer } => p.ok,
+    );
+
+    // If nothing survived validation/encoding there's nothing to persist.
+    if (readyToInsert.length === 0) {
       return {
         ok: false,
-        error: `Image must be smaller than ${
-          MAX_CHAPTER_IMAGE_BYTES / (1024 * 1024)
-        } MB`,
+        results: prepared.map((p) =>
+          p.ok
+            ? { ok: true, id: p.id, sequence: 0 }
+            : { ok: false, error: p.error },
+        ),
       };
     }
 
-    const imageId = crypto.randomUUID();
-    const filePath = `${CHAPTER_IMAGES_DIR}/${imageId}.webp`;
+    const inserted: { id: string; sequence: number }[] = [];
 
     try {
-      const webpBytes = await new Bun.Image(imageBytes)
-        .webp({ lossless: true })
-        .bytes();
-      await Bun.write(filePath, webpBytes);
-    } catch (err) {
-      console.error("Failed to encode/write chapter image:", err);
-      return { ok: false, error: "Failed to save image" };
-    }
-
-    try {
-      const row = await db.transaction(async (tx) => {
-        // Lock the chapter row so concurrent image uploads for the same chapter
-        // serialize, preventing two transactions from picking the same sequence.
+      await db.transaction(async (tx) => {
+        // Lock the chapter row so concurrent image uploads for the same chapter serialize,
+        // preventing two transactions from picking the same sequence.
         const [chapterRow] = await tx
           .select({ id: chapter.id })
           .from(chapter)
           .where(eq(chapter.id, data.chapterId))
           .for("update");
 
-        if (!chapterRow) return null;
+        if (!chapterRow) throw new Error("Chapter not found");
 
         const lastImage = await tx
           .select({ sequence: image.sequence })
@@ -1255,35 +1291,50 @@ export const createChapterImageFn = createServerFn({ method: "POST" })
           .orderBy(desc(image.sequence))
           .limit(1);
 
-        const nextSequence = (lastImage[0]?.sequence ?? -1) + 1;
+        let nextSequence = (lastImage[0]?.sequence ?? -1) + 1;
 
-        const [inserted] = await tx
-          .insert(image)
-          .values({
-            id: imageId,
-            chapterId: data.chapterId,
-            sequence: nextSequence,
-          })
-          .returning();
+        for (const item of readyToInsert) {
+          const [row] = await tx
+            .insert(image)
+            .values({
+              id: item.id,
+              chapterId: data.chapterId,
+              sequence: nextSequence++,
+            })
+            .returning();
 
-        return inserted ?? null;
+          if (!row) throw new Error(`Failed to insert image ${item.id}`);
+          inserted.push({ id: row.id, sequence: row.sequence ?? 0 });
+        }
       });
+    } catch (err) {
+      console.error("Failed to create chapter images:", err);
 
-      if (!row) {
+      // Clean up any files we wrote since none of them are now referenced by the database (the transaction rolled back).
+      for (const filePath of writtenPaths) {
         try {
           await unlink(filePath);
         } catch {}
-        return { ok: false, error: "Failed to create chapter image" };
       }
 
-      return { ok: true, id: row.id, sequence: row.sequence ?? 0 };
-    } catch (err) {
-      console.error("Failed to create chapter image:", err);
-      try {
-        await unlink(filePath);
-      } catch {}
-      return { ok: false, error: "Failed to create chapter image" };
+      const results: CreateChapterImageItemResult[] = prepared.map((p) =>
+        p.ok
+          ? { ok: false, error: "Failed to create chapter image" }
+          : { ok: false, error: p.error },
+      );
+      return { ok: false, results };
     }
+
+    // Stitch per-image results back together in input order so the client can map each input file to its outcome.
+    let insertIdx = 0;
+    const results: CreateChapterImageItemResult[] = prepared.map((p) => {
+      if (!p.ok) return { ok: false, error: p.error };
+      const row = inserted[insertIdx++];
+      return { ok: true, id: p.id, sequence: row.sequence };
+    });
+
+    const ok = results.every((r) => r.ok);
+    return ok ? { ok: true, results } : { ok: false, results };
   });
 
 // ---------- Delete Chapter Image ----------
