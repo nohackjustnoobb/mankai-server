@@ -14,7 +14,7 @@ export const Route = createFileRoute("/api/suggestion")({
       GET: async ({ request }) => {
         const params = new URL(request.url).searchParams;
 
-        const search = params.get("search")?.trim() || undefined;
+        const search = params.get("query")?.trim() || undefined;
 
         let searchEmbedding: number[] | null = null;
         if (search) {

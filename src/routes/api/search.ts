@@ -13,7 +13,7 @@ export const Route = createFileRoute("/api/search")({
       GET: async ({ request }) => {
         const params = new URL(request.url).searchParams;
 
-        const search = params.get("search")?.trim();
+        const search = params.get("query")?.trim();
         if (!search) {
           throw new Response("Missing search query", { status: 400 });
         }
