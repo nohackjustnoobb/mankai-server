@@ -1,39 +1,40 @@
 CREATE TYPE "role" AS ENUM('admin', 'member');--> statement-breakpoint
 CREATE TABLE "chapter" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"id" text PRIMARY KEY,
 	"title" text,
 	"locked" boolean DEFAULT false NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"chapter_group_id" uuid NOT NULL,
+	"chapter_group_id" text NOT NULL,
 	"sequence" integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "chapter_group" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"id" text PRIMARY KEY,
 	"title" text,
-	"manga_id" uuid NOT NULL,
+	"manga_id" text NOT NULL,
 	"sequence" integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "image" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	"chapter_id" uuid,
+	"id" text PRIMARY KEY,
+	"chapter_id" text,
 	"sequence" integer,
-	"manga_id" uuid UNIQUE,
+	"manga_id" text UNIQUE,
 	CONSTRAINT "image_exactly_one_of_chapter_or_manga" CHECK ((chapter_id IS NULL) <> (manga_id IS NULL))
 );
 --> statement-breakpoint
 CREATE TABLE "manga" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"id" text PRIMARY KEY,
 	"title" text,
 	"status" integer,
+	"reading_direction" integer,
 	"description" text,
 	"authors" text[],
 	"genres" text[],
 	"remarks" text,
 	"embedding" vector(1024),
-	"created_by" uuid,
+	"created_by" text,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
@@ -41,7 +42,7 @@ CREATE TABLE "manga" (
 CREATE TABLE "record" (
 	"manga_id" text,
 	"plugin_id" text,
-	"user_id" uuid,
+	"user_id" text,
 	"datetime" timestamp NOT NULL,
 	"chapter_id" text NOT NULL,
 	"chapter_title" text,
@@ -53,7 +54,7 @@ CREATE TABLE "record" (
 CREATE TABLE "saved" (
 	"manga_id" text,
 	"plugin_id" text,
-	"user_id" uuid,
+	"user_id" text,
 	"datetime" timestamp NOT NULL,
 	"updates" boolean NOT NULL,
 	"latest_chapter" text NOT NULL,
@@ -63,7 +64,7 @@ CREATE TABLE "saved" (
 );
 --> statement-breakpoint
 CREATE TABLE "user" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"id" text PRIMARY KEY,
 	"email" text NOT NULL UNIQUE,
 	"password" text NOT NULL,
 	"role" "role" DEFAULT 'member'::"role" NOT NULL,

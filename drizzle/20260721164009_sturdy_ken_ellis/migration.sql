@@ -1,1 +1,0 @@
-ALTER TABLE "manga" ADD COLUMN "reading_direction" integer;

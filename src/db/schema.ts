@@ -1,7 +1,6 @@
 import {
   pgTable,
   pgEnum,
-  uuid,
   text,
   timestamp,
   integer,
@@ -25,7 +24,9 @@ export function generateApiKey(bytes = 32): string {
 }
 
 export const user = pgTable("user", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   role: roleEnum("role").notNull().default("member"),
@@ -45,7 +46,9 @@ export const user = pgTable("user", {
 export const manga = pgTable(
   "manga",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     title: text("title"),
     status: integer("status"),
     readingDirection: integer("reading_direction"),
@@ -56,7 +59,7 @@ export const manga = pgTable(
 
     embedding: vector("embedding", { dimensions: 1024 }),
 
-    createdBy: uuid("created_by").references(() => user.id, {
+    createdBy: text("created_by").references(() => user.id, {
       onDelete: "set null",
     }),
     updatedAt: timestamp("updated_at")
@@ -76,10 +79,12 @@ export const manga = pgTable(
 export const chapterGroup = pgTable(
   "chapter_group",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     title: text("title"),
 
-    mangaId: uuid("manga_id")
+    mangaId: text("manga_id")
       .notNull()
       .references(() => manga.id, { onDelete: "cascade" }),
     sequence: integer("sequence").notNull(),
@@ -90,7 +95,9 @@ export const chapterGroup = pgTable(
 export const chapter = pgTable(
   "chapter",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     title: text("title"),
     locked: boolean("locked").notNull().default(false),
 
@@ -100,7 +107,7 @@ export const chapter = pgTable(
       .notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 
-    chapterGroupId: uuid("chapter_group_id")
+    chapterGroupId: text("chapter_group_id")
       .notNull()
       .references(() => chapterGroup.id, { onDelete: "cascade" }),
     sequence: integer("sequence").notNull(),
@@ -111,16 +118,18 @@ export const chapter = pgTable(
 export const image = pgTable(
   "image",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
 
     // as content
-    chapterId: uuid("chapter_id").references(() => chapter.id, {
+    chapterId: text("chapter_id").references(() => chapter.id, {
       onDelete: "set null",
     }),
     sequence: integer("sequence"),
 
     // as cover
-    mangaId: uuid("manga_id")
+    mangaId: text("manga_id")
       .references(() => manga.id, { onDelete: "set null" })
       .unique(),
   },
@@ -140,7 +149,7 @@ export const record = pgTable(
   {
     mangaId: text("manga_id").notNull(),
     pluginId: text("plugin_id").notNull(),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
 
@@ -164,7 +173,7 @@ export const saved = pgTable(
   {
     mangaId: text("manga_id").notNull(),
     pluginId: text("plugin_id").notNull(),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
 
