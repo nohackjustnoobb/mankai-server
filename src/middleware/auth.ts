@@ -4,7 +4,7 @@ import { getRequestHeader } from "@tanstack/react-start/server";
 import { useAppSession } from "#/utils/session.server";
 import { verifyToken, type AccessTokenPayload } from "#/utils/jwt.server";
 
-function uidFromAccessToken(token: string): string | null {
+function authFromAccessToken(token: string) {
   let payload: AccessTokenPayload;
   try {
     payload = verifyToken<AccessTokenPayload>(token);
@@ -16,24 +16,28 @@ function uidFromAccessToken(token: string): string | null {
     throw new Response("Unauthorized", { status: 401 });
   }
 
-  return payload.sub ?? null;
+  return { userId: payload.sub, role: payload.role };
 }
 
 export const apiAuthMiddleware = createMiddleware().server(async ({ next }) => {
   const authHeader = getRequestHeader("authorization");
   const bearerMatch = authHeader?.match(/^Bearer\s+(.+)$/i);
 
-  const userId = bearerMatch
-    ? uidFromAccessToken(bearerMatch[1])
-    : (await useAppSession()).data.userId;
+  const auth = bearerMatch
+    ? authFromAccessToken(bearerMatch[1])
+    : (await useAppSession()).data;
 
-  if (!userId) {
+  if (
+    !auth.userId ||
+    (auth.role !== "admin" && auth.role !== "member")
+  ) {
     throw new Response("Unauthorized", { status: 401 });
   }
 
   return next({
     context: {
-      userId,
+      userId: auth.userId,
+      role: auth.role,
     },
   });
 });

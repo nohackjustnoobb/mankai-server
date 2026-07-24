@@ -29,7 +29,8 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.25.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@clack/prompts": "^1.7.0",

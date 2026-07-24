@@ -1,10 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
-
-const IMAGES_DIR = "./data/images";
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { IMAGE_UUID_RE, IMAGES_DIR } from "#/utils/image.server.ts";
 
 type ImageKind = "manga" | "chapter";
 
@@ -20,7 +16,7 @@ function parseSplat(
   if (!file.endsWith(".webp")) return null;
 
   const id = file.slice(0, -".webp".length);
-  if (!UUID_RE.test(id)) return null;
+  if (!IMAGE_UUID_RE.test(id)) return null;
 
   return { kind: kind as ImageKind, id };
 }

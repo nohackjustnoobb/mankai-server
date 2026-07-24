@@ -2,6 +2,7 @@ import { useSession } from "@tanstack/react-start/server";
 
 export type AppSessionData = {
   userId?: string;
+  role?: "admin" | "member";
 };
 
 function getSessionSecret(): string {

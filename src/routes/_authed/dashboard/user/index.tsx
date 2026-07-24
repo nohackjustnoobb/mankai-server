@@ -14,6 +14,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 
 import { useNotification } from "#/components/notifications/useNotification";
 import ConfirmModal from "#/modals/ConfirmModal.tsx";
@@ -45,45 +46,29 @@ const ACTIVE_OPTIONS = [
 type RoleFilter = (typeof ROLE_OPTIONS)[number]["value"];
 type ActiveFilter = (typeof ACTIVE_OPTIONS)[number]["value"];
 
-type UserSearch = {
-  role?: RoleFilter;
-  active?: ActiveFilter;
-  search?: string;
-  page?: number;
-};
-
-const USER_ROLES: ReadonlySet<RoleFilter> = new Set(["admin", "member"]);
-const USER_ACTIVE: ReadonlySet<ActiveFilter> = new Set(["active", "inactive"]);
+const userSearchSchema = z.object({
+  role: z.preprocess(
+    (value) => (value ? value : undefined),
+    z.enum(["all", "admin", "member"]).catch("all").optional(),
+  ),
+  active: z.preprocess(
+    (value) => (value ? value : undefined),
+    z.enum(["all", "active", "inactive"]).catch("all").optional(),
+  ),
+  search: z.preprocess((value) => {
+    if (!value) return undefined;
+    const normalized = String(value).trim();
+    return normalized || undefined;
+  }, z.string().optional()),
+  page: z.preprocess((value) => {
+    if (!value) return undefined;
+    const rawPage = Number(value);
+    return Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1;
+  }, z.number().optional()),
+});
 
 export const Route = createFileRoute("/_authed/dashboard/user/")({
-  validateSearch: (search: Record<string, unknown>): UserSearch => {
-    const parsed: UserSearch = {};
-
-    if (search.role) {
-      parsed.role = USER_ROLES.has(search.role as RoleFilter)
-        ? (search.role as RoleFilter)
-        : "all";
-    }
-
-    if (search.active) {
-      parsed.active = USER_ACTIVE.has(search.active as ActiveFilter)
-        ? (search.active as ActiveFilter)
-        : "all";
-    }
-
-    if (search.search) {
-      const value = String(search.search).trim();
-      if (value) parsed.search = value;
-    }
-
-    if (search.page) {
-      const rawPage = Number(search.page);
-      parsed.page =
-        Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1;
-    }
-
-    return parsed;
-  },
+  validateSearch: userSearchSchema,
   loader: async () => {
     const apiUrl = await getApiUrlFn();
     return { apiUrl };

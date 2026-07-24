@@ -66,7 +66,7 @@ export const loginFn = createServerFn({ method: "POST" })
     }
 
     const session = await useAppSession();
-    await session.update({ userId: user.id });
+    await session.update({ userId: user.id, role: user.role });
 
     throw redirect({ to: data.redirectTo || "/dashboard" });
   });

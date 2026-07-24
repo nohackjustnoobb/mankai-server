@@ -14,6 +14,11 @@ import { chapter, chapterGroup, image, manga, user } from "#/db/schema";
 import { useAppSession } from "#/utils/session.server";
 import { embed } from "#/utils/embedding.server";
 import {
+  CHAPTER_IMAGES_DIR,
+  MANGA_IMAGES_DIR,
+  MAX_IMAGE_BYTES,
+} from "#/utils/image.server.ts";
+import {
   Genre,
   Status,
   ReadingDirection,
@@ -38,11 +43,6 @@ export type UpsertMangaInput = {
 
 export type UpsertMangaResult =
   { ok: true; id: string } | { ok: false; error: string };
-
-const COVERS_DIR = "./data/images/manga";
-const CHAPTER_IMAGES_DIR = "./data/images/chapter";
-const MAX_COVER_BYTES = 10 * 1024 * 1024;
-const MAX_CHAPTER_IMAGE_BYTES = 10 * 1024 * 1024;
 
 export const upsertMangaFn = createServerFn({ method: "POST" })
   .validator((data: UpsertMangaInput) => data)
@@ -103,11 +103,11 @@ export const upsertMangaFn = createServerFn({ method: "POST" })
           error: "Invalid cover image data",
         };
       }
-      if (coverBytes.length > MAX_COVER_BYTES) {
+      if (coverBytes.length > MAX_IMAGE_BYTES) {
         return {
           ok: false,
           error: `Cover image must be smaller than ${
-            MAX_COVER_BYTES / (1024 * 1024)
+            MAX_IMAGE_BYTES / (1024 * 1024)
           } MB`,
         };
       }
@@ -137,7 +137,7 @@ export const upsertMangaFn = createServerFn({ method: "POST" })
     let coverFilePath: string | null = null;
     if (coverBytes) {
       coverImageId = crypto.randomUUID();
-      coverFilePath = `${COVERS_DIR}/${coverImageId}.webp`;
+      coverFilePath = `${MANGA_IMAGES_DIR}/${coverImageId}.webp`;
       try {
         const webpBytes = await new Bun.Image(coverBytes)
           .webp({ lossless: true })
@@ -226,7 +226,7 @@ export const upsertMangaFn = createServerFn({ method: "POST" })
     }
 
     if (oldCoverImageId) {
-      const oldCoverFilePath = `${COVERS_DIR}/${oldCoverImageId}.webp`;
+      const oldCoverFilePath = `${MANGA_IMAGES_DIR}/${oldCoverImageId}.webp`;
       try {
         await unlink(oldCoverFilePath);
       } catch {}
@@ -485,7 +485,7 @@ export const deleteMangaFn = createServerFn({ method: "POST" })
     // Best-effort cleanup of image files on disk.
     if (coverImageId) {
       try {
-        await unlink(`${COVERS_DIR}/${coverImageId}.webp`);
+        await unlink(`${MANGA_IMAGES_DIR}/${coverImageId}.webp`);
       } catch {}
     }
 
@@ -1210,8 +1210,7 @@ export const createChapterImageFn = createServerFn({ method: "POST" })
       return { ok: false, error: "At least one image is required" };
     }
 
-    type Prepared =
-      { ok: true; id: string; bytes: Buffer } | { ok: false; error: string };
+    type Prepared = { ok: true; id: string } | { ok: false; error: string };
     const prepared: Prepared[] = await Promise.all(
       data.images.map(async (raw) => {
         const base64 = raw?.trim();
@@ -1226,11 +1225,11 @@ export const createChapterImageFn = createServerFn({ method: "POST" })
           return { ok: false, error: "Invalid image data" } as const;
         }
 
-        if (bytes.length > MAX_CHAPTER_IMAGE_BYTES) {
+        if (bytes.length > MAX_IMAGE_BYTES) {
           return {
             ok: false,
             error: `Image must be smaller than ${
-              MAX_CHAPTER_IMAGE_BYTES / (1024 * 1024)
+              MAX_IMAGE_BYTES / (1024 * 1024)
             } MB`,
           } as const;
         }
@@ -1246,16 +1245,16 @@ export const createChapterImageFn = createServerFn({ method: "POST" })
           return { ok: false, error: "Failed to save image" } as const;
         }
 
-        return { ok: true, id, bytes } as const;
+        return { ok: true, id } as const;
       }),
     );
 
     const writtenPaths = prepared
-      .filter((p): p is { ok: true; id: string; bytes: Buffer } => p.ok)
+      .filter((p): p is { ok: true; id: string } => p.ok)
       .map((p) => `${CHAPTER_IMAGES_DIR}/${p.id}.webp`);
 
     const readyToInsert = prepared.filter(
-      (p): p is { ok: true; id: string; bytes: Buffer } => p.ok,
+      (p): p is { ok: true; id: string } => p.ok,
     );
 
     // If nothing survived validation/encoding there's nothing to persist.
@@ -1291,31 +1290,36 @@ export const createChapterImageFn = createServerFn({ method: "POST" })
           .orderBy(desc(image.sequence))
           .limit(1);
 
-        let nextSequence = (lastImage[0]?.sequence ?? -1) + 1;
-
-        for (const item of readyToInsert) {
-          const [row] = await tx
-            .insert(image)
-            .values({
+        const nextSequence = (lastImage[0]?.sequence ?? -1) + 1;
+        const rows = await tx
+          .insert(image)
+          .values(
+            readyToInsert.map((item, index) => ({
               id: item.id,
               chapterId: data.chapterId,
-              sequence: nextSequence++,
-            })
-            .returning();
+              sequence: nextSequence + index,
+            })),
+          )
+          .returning();
 
-          if (!row) throw new Error(`Failed to insert image ${item.id}`);
-          inserted.push({ id: row.id, sequence: row.sequence ?? 0 });
+        if (rows.length !== readyToInsert.length) {
+          throw new Error("Failed to insert chapter images");
         }
+
+        inserted.push(
+          ...rows.map((row) => ({
+            id: row.id,
+            sequence: row.sequence ?? 0,
+          })),
+        );
       });
     } catch (err) {
       console.error("Failed to create chapter images:", err);
 
       // Clean up any files we wrote since none of them are now referenced by the database (the transaction rolled back).
-      for (const filePath of writtenPaths) {
-        try {
-          await unlink(filePath);
-        } catch {}
-      }
+      await Promise.allSettled(
+        writtenPaths.map((filePath) => unlink(filePath)),
+      );
 
       const results: CreateChapterImageItemResult[] = prepared.map((p) =>
         p.ok

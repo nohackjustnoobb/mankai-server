@@ -25,6 +25,7 @@ export interface APIDetailedManga extends APIManga {
   genres: Genre[];
   chapters: Record<string, APIChapter[]>;
   remarks?: string;
+  editable?: boolean;
 }
 
 export type MangaListRow = {

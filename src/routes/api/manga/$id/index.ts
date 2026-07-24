@@ -16,7 +16,7 @@ type ChapterGroupRow = typeof chapterGroup.$inferSelect & {
 
 type MangaDetailRow = Omit<
   typeof manga.$inferSelect,
-  "embedding" | "createdBy" | "createdAt"
+  "embedding" | "createdAt"
 > & {
   cover: { id: string } | null;
   chapterGroups: ChapterGroupRow[];
@@ -48,12 +48,11 @@ export const Route = createFileRoute("/api/manga/$id/")({
   server: {
     middleware: [apiAuthMiddleware],
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params, context }) => {
         const row = await db.query.manga.findFirst({
           where: { id: params.id },
           columns: {
             embedding: false,
-            createdBy: false,
             createdAt: false,
           },
           with: {
@@ -99,6 +98,8 @@ export const Route = createFileRoute("/api/manga/$id/")({
           genres: detail.genres ?? [],
           chapters,
           updatedAt: detail.updatedAt.getTime(),
+          editable:
+            context.role === "admin" || detail.createdBy === context.userId,
         };
 
         if (detail.title) result.title = detail.title;

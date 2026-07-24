@@ -29,10 +29,23 @@ import { Route as ApiImageSplatRouteImport } from './routes/api/image/$'
 import { Route as ApiAuthRefreshRouteImport } from './routes/api/auth/refresh'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiMangaIdIndexRouteImport } from './routes/api/manga/$id/index'
+import { Route as ApiEditMangaIndexRouteImport } from './routes/api/edit/manga/index'
+import { Route as ApiEditChapterIndexRouteImport } from './routes/api/edit/chapter/index'
+import { Route as ApiEditChapterGroupIndexRouteImport } from './routes/api/edit/chapter-group/index'
 import { Route as AuthedDashboardUserIndexRouteImport } from './routes/_authed/dashboard/user/index'
 import { Route as AuthedDashboardMangaIdIndexRouteImport } from './routes/_authed/dashboard/$mangaId/index'
+import { Route as ApiEditImagesOrderRouteImport } from './routes/api/edit/images/order'
+import { Route as ApiEditImagesDeleteRouteImport } from './routes/api/edit/images/delete'
+import { Route as ApiEditChapterOrderRouteImport } from './routes/api/edit/chapter/order'
+import { Route as ApiEditChapterGroupIdRouteImport } from './routes/api/edit/chapter-group/id'
 import { Route as AuthedDashboardMangaIdChapterIdRouteImport } from './routes/_authed/dashboard/$mangaId/$chapterId'
+import { Route as ApiEditMangaIdIndexRouteImport } from './routes/api/edit/manga/$id/index'
+import { Route as ApiEditChapterIdIndexRouteImport } from './routes/api/edit/chapter/$id/index'
+import { Route as ApiEditChapterGroupIdIndexRouteImport } from './routes/api/edit/chapter-group/$id/index'
 import { Route as ApiMangaIdChapterChapterIdRouteImport } from './routes/api/manga/$id/chapter/$chapterId'
+import { Route as ApiEditMangaIdCoverRouteImport } from './routes/api/edit/manga/$id/cover'
+import { Route as ApiEditChapterIdImagesRouteImport } from './routes/api/edit/chapter/$id/images'
+import { Route as ApiEditChapterGroupIdChaptersRouteImport } from './routes/api/edit/chapter-group/$id/chapters'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -133,6 +146,22 @@ const ApiMangaIdIndexRoute = ApiMangaIdIndexRouteImport.update({
   path: '/api/manga/$id/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEditMangaIndexRoute = ApiEditMangaIndexRouteImport.update({
+  id: '/api/edit/manga/',
+  path: '/api/edit/manga/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditChapterIndexRoute = ApiEditChapterIndexRouteImport.update({
+  id: '/api/edit/chapter/',
+  path: '/api/edit/chapter/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditChapterGroupIndexRoute =
+  ApiEditChapterGroupIndexRouteImport.update({
+    id: '/api/edit/chapter-group/',
+    path: '/api/edit/chapter-group/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthedDashboardUserIndexRoute =
   AuthedDashboardUserIndexRouteImport.update({
     id: '/user/',
@@ -145,16 +174,68 @@ const AuthedDashboardMangaIdIndexRoute =
     path: '/$mangaId/',
     getParentRoute: () => AuthedDashboardRoute,
   } as any)
+const ApiEditImagesOrderRoute = ApiEditImagesOrderRouteImport.update({
+  id: '/api/edit/images/order',
+  path: '/api/edit/images/order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditImagesDeleteRoute = ApiEditImagesDeleteRouteImport.update({
+  id: '/api/edit/images/delete',
+  path: '/api/edit/images/delete',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditChapterOrderRoute = ApiEditChapterOrderRouteImport.update({
+  id: '/api/edit/chapter/order',
+  path: '/api/edit/chapter/order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditChapterGroupIdRoute = ApiEditChapterGroupIdRouteImport.update({
+  id: '/api/edit/chapter-group/id',
+  path: '/api/edit/chapter-group/id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthedDashboardMangaIdChapterIdRoute =
   AuthedDashboardMangaIdChapterIdRouteImport.update({
     id: '/$mangaId/$chapterId',
     path: '/$mangaId/$chapterId',
     getParentRoute: () => AuthedDashboardRoute,
   } as any)
+const ApiEditMangaIdIndexRoute = ApiEditMangaIdIndexRouteImport.update({
+  id: '/api/edit/manga/$id/',
+  path: '/api/edit/manga/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditChapterIdIndexRoute = ApiEditChapterIdIndexRouteImport.update({
+  id: '/api/edit/chapter/$id/',
+  path: '/api/edit/chapter/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditChapterGroupIdIndexRoute =
+  ApiEditChapterGroupIdIndexRouteImport.update({
+    id: '/api/edit/chapter-group/$id/',
+    path: '/api/edit/chapter-group/$id/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiMangaIdChapterChapterIdRoute =
   ApiMangaIdChapterChapterIdRouteImport.update({
     id: '/api/manga/$id/chapter/$chapterId',
     path: '/api/manga/$id/chapter/$chapterId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiEditMangaIdCoverRoute = ApiEditMangaIdCoverRouteImport.update({
+  id: '/api/edit/manga/$id/cover',
+  path: '/api/edit/manga/$id/cover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditChapterIdImagesRoute = ApiEditChapterIdImagesRouteImport.update({
+  id: '/api/edit/chapter/$id/images',
+  path: '/api/edit/chapter/$id/images',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditChapterGroupIdChaptersRoute =
+  ApiEditChapterGroupIdChaptersRouteImport.update({
+    id: '/api/edit/chapter-group/$id/chapters',
+    path: '/api/edit/chapter-group/$id/chapters',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -178,10 +259,23 @@ export interface FileRoutesByFullPath {
   '/api/manga/': typeof ApiMangaIndexRoute
   '/api/saveds/': typeof ApiSavedsIndexRoute
   '/dashboard/$mangaId/$chapterId': typeof AuthedDashboardMangaIdChapterIdRoute
+  '/api/edit/chapter-group/id': typeof ApiEditChapterGroupIdRoute
+  '/api/edit/chapter/order': typeof ApiEditChapterOrderRoute
+  '/api/edit/images/delete': typeof ApiEditImagesDeleteRoute
+  '/api/edit/images/order': typeof ApiEditImagesOrderRoute
   '/dashboard/$mangaId/': typeof AuthedDashboardMangaIdIndexRoute
   '/dashboard/user/': typeof AuthedDashboardUserIndexRoute
+  '/api/edit/chapter-group/': typeof ApiEditChapterGroupIndexRoute
+  '/api/edit/chapter/': typeof ApiEditChapterIndexRoute
+  '/api/edit/manga/': typeof ApiEditMangaIndexRoute
   '/api/manga/$id/': typeof ApiMangaIdIndexRoute
+  '/api/edit/chapter-group/$id/chapters': typeof ApiEditChapterGroupIdChaptersRoute
+  '/api/edit/chapter/$id/images': typeof ApiEditChapterIdImagesRoute
+  '/api/edit/manga/$id/cover': typeof ApiEditMangaIdCoverRoute
   '/api/manga/$id/chapter/$chapterId': typeof ApiMangaIdChapterChapterIdRoute
+  '/api/edit/chapter-group/$id/': typeof ApiEditChapterGroupIdIndexRoute
+  '/api/edit/chapter/$id/': typeof ApiEditChapterIdIndexRoute
+  '/api/edit/manga/$id/': typeof ApiEditMangaIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -202,10 +296,23 @@ export interface FileRoutesByTo {
   '/api/manga': typeof ApiMangaIndexRoute
   '/api/saveds': typeof ApiSavedsIndexRoute
   '/dashboard/$mangaId/$chapterId': typeof AuthedDashboardMangaIdChapterIdRoute
+  '/api/edit/chapter-group/id': typeof ApiEditChapterGroupIdRoute
+  '/api/edit/chapter/order': typeof ApiEditChapterOrderRoute
+  '/api/edit/images/delete': typeof ApiEditImagesDeleteRoute
+  '/api/edit/images/order': typeof ApiEditImagesOrderRoute
   '/dashboard/$mangaId': typeof AuthedDashboardMangaIdIndexRoute
   '/dashboard/user': typeof AuthedDashboardUserIndexRoute
+  '/api/edit/chapter-group': typeof ApiEditChapterGroupIndexRoute
+  '/api/edit/chapter': typeof ApiEditChapterIndexRoute
+  '/api/edit/manga': typeof ApiEditMangaIndexRoute
   '/api/manga/$id': typeof ApiMangaIdIndexRoute
+  '/api/edit/chapter-group/$id/chapters': typeof ApiEditChapterGroupIdChaptersRoute
+  '/api/edit/chapter/$id/images': typeof ApiEditChapterIdImagesRoute
+  '/api/edit/manga/$id/cover': typeof ApiEditMangaIdCoverRoute
   '/api/manga/$id/chapter/$chapterId': typeof ApiMangaIdChapterChapterIdRoute
+  '/api/edit/chapter-group/$id': typeof ApiEditChapterGroupIdIndexRoute
+  '/api/edit/chapter/$id': typeof ApiEditChapterIdIndexRoute
+  '/api/edit/manga/$id': typeof ApiEditMangaIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -229,10 +336,23 @@ export interface FileRoutesById {
   '/api/manga/': typeof ApiMangaIndexRoute
   '/api/saveds/': typeof ApiSavedsIndexRoute
   '/_authed/dashboard/$mangaId/$chapterId': typeof AuthedDashboardMangaIdChapterIdRoute
+  '/api/edit/chapter-group/id': typeof ApiEditChapterGroupIdRoute
+  '/api/edit/chapter/order': typeof ApiEditChapterOrderRoute
+  '/api/edit/images/delete': typeof ApiEditImagesDeleteRoute
+  '/api/edit/images/order': typeof ApiEditImagesOrderRoute
   '/_authed/dashboard/$mangaId/': typeof AuthedDashboardMangaIdIndexRoute
   '/_authed/dashboard/user/': typeof AuthedDashboardUserIndexRoute
+  '/api/edit/chapter-group/': typeof ApiEditChapterGroupIndexRoute
+  '/api/edit/chapter/': typeof ApiEditChapterIndexRoute
+  '/api/edit/manga/': typeof ApiEditMangaIndexRoute
   '/api/manga/$id/': typeof ApiMangaIdIndexRoute
+  '/api/edit/chapter-group/$id/chapters': typeof ApiEditChapterGroupIdChaptersRoute
+  '/api/edit/chapter/$id/images': typeof ApiEditChapterIdImagesRoute
+  '/api/edit/manga/$id/cover': typeof ApiEditMangaIdCoverRoute
   '/api/manga/$id/chapter/$chapterId': typeof ApiMangaIdChapterChapterIdRoute
+  '/api/edit/chapter-group/$id/': typeof ApiEditChapterGroupIdIndexRoute
+  '/api/edit/chapter/$id/': typeof ApiEditChapterIdIndexRoute
+  '/api/edit/manga/$id/': typeof ApiEditMangaIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -256,10 +376,23 @@ export interface FileRouteTypes {
     | '/api/manga/'
     | '/api/saveds/'
     | '/dashboard/$mangaId/$chapterId'
+    | '/api/edit/chapter-group/id'
+    | '/api/edit/chapter/order'
+    | '/api/edit/images/delete'
+    | '/api/edit/images/order'
     | '/dashboard/$mangaId/'
     | '/dashboard/user/'
+    | '/api/edit/chapter-group/'
+    | '/api/edit/chapter/'
+    | '/api/edit/manga/'
     | '/api/manga/$id/'
+    | '/api/edit/chapter-group/$id/chapters'
+    | '/api/edit/chapter/$id/images'
+    | '/api/edit/manga/$id/cover'
     | '/api/manga/$id/chapter/$chapterId'
+    | '/api/edit/chapter-group/$id/'
+    | '/api/edit/chapter/$id/'
+    | '/api/edit/manga/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -280,10 +413,23 @@ export interface FileRouteTypes {
     | '/api/manga'
     | '/api/saveds'
     | '/dashboard/$mangaId/$chapterId'
+    | '/api/edit/chapter-group/id'
+    | '/api/edit/chapter/order'
+    | '/api/edit/images/delete'
+    | '/api/edit/images/order'
     | '/dashboard/$mangaId'
     | '/dashboard/user'
+    | '/api/edit/chapter-group'
+    | '/api/edit/chapter'
+    | '/api/edit/manga'
     | '/api/manga/$id'
+    | '/api/edit/chapter-group/$id/chapters'
+    | '/api/edit/chapter/$id/images'
+    | '/api/edit/manga/$id/cover'
     | '/api/manga/$id/chapter/$chapterId'
+    | '/api/edit/chapter-group/$id'
+    | '/api/edit/chapter/$id'
+    | '/api/edit/manga/$id'
   id:
     | '__root__'
     | '/'
@@ -306,10 +452,23 @@ export interface FileRouteTypes {
     | '/api/manga/'
     | '/api/saveds/'
     | '/_authed/dashboard/$mangaId/$chapterId'
+    | '/api/edit/chapter-group/id'
+    | '/api/edit/chapter/order'
+    | '/api/edit/images/delete'
+    | '/api/edit/images/order'
     | '/_authed/dashboard/$mangaId/'
     | '/_authed/dashboard/user/'
+    | '/api/edit/chapter-group/'
+    | '/api/edit/chapter/'
+    | '/api/edit/manga/'
     | '/api/manga/$id/'
+    | '/api/edit/chapter-group/$id/chapters'
+    | '/api/edit/chapter/$id/images'
+    | '/api/edit/manga/$id/cover'
     | '/api/manga/$id/chapter/$chapterId'
+    | '/api/edit/chapter-group/$id/'
+    | '/api/edit/chapter/$id/'
+    | '/api/edit/manga/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -330,8 +489,21 @@ export interface RootRouteChildren {
   ApiSavedsRemoveRoute: typeof ApiSavedsRemoveRoute
   ApiMangaIndexRoute: typeof ApiMangaIndexRoute
   ApiSavedsIndexRoute: typeof ApiSavedsIndexRoute
+  ApiEditChapterGroupIdRoute: typeof ApiEditChapterGroupIdRoute
+  ApiEditChapterOrderRoute: typeof ApiEditChapterOrderRoute
+  ApiEditImagesDeleteRoute: typeof ApiEditImagesDeleteRoute
+  ApiEditImagesOrderRoute: typeof ApiEditImagesOrderRoute
+  ApiEditChapterGroupIndexRoute: typeof ApiEditChapterGroupIndexRoute
+  ApiEditChapterIndexRoute: typeof ApiEditChapterIndexRoute
+  ApiEditMangaIndexRoute: typeof ApiEditMangaIndexRoute
   ApiMangaIdIndexRoute: typeof ApiMangaIdIndexRoute
+  ApiEditChapterGroupIdChaptersRoute: typeof ApiEditChapterGroupIdChaptersRoute
+  ApiEditChapterIdImagesRoute: typeof ApiEditChapterIdImagesRoute
+  ApiEditMangaIdCoverRoute: typeof ApiEditMangaIdCoverRoute
   ApiMangaIdChapterChapterIdRoute: typeof ApiMangaIdChapterChapterIdRoute
+  ApiEditChapterGroupIdIndexRoute: typeof ApiEditChapterGroupIdIndexRoute
+  ApiEditChapterIdIndexRoute: typeof ApiEditChapterIdIndexRoute
+  ApiEditMangaIdIndexRoute: typeof ApiEditMangaIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -476,6 +648,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMangaIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/edit/manga/': {
+      id: '/api/edit/manga/'
+      path: '/api/edit/manga'
+      fullPath: '/api/edit/manga/'
+      preLoaderRoute: typeof ApiEditMangaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edit/chapter/': {
+      id: '/api/edit/chapter/'
+      path: '/api/edit/chapter'
+      fullPath: '/api/edit/chapter/'
+      preLoaderRoute: typeof ApiEditChapterIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edit/chapter-group/': {
+      id: '/api/edit/chapter-group/'
+      path: '/api/edit/chapter-group'
+      fullPath: '/api/edit/chapter-group/'
+      preLoaderRoute: typeof ApiEditChapterGroupIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed/dashboard/user/': {
       id: '/_authed/dashboard/user/'
       path: '/user'
@@ -490,6 +683,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardMangaIdIndexRouteImport
       parentRoute: typeof AuthedDashboardRoute
     }
+    '/api/edit/images/order': {
+      id: '/api/edit/images/order'
+      path: '/api/edit/images/order'
+      fullPath: '/api/edit/images/order'
+      preLoaderRoute: typeof ApiEditImagesOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edit/images/delete': {
+      id: '/api/edit/images/delete'
+      path: '/api/edit/images/delete'
+      fullPath: '/api/edit/images/delete'
+      preLoaderRoute: typeof ApiEditImagesDeleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edit/chapter/order': {
+      id: '/api/edit/chapter/order'
+      path: '/api/edit/chapter/order'
+      fullPath: '/api/edit/chapter/order'
+      preLoaderRoute: typeof ApiEditChapterOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edit/chapter-group/id': {
+      id: '/api/edit/chapter-group/id'
+      path: '/api/edit/chapter-group/id'
+      fullPath: '/api/edit/chapter-group/id'
+      preLoaderRoute: typeof ApiEditChapterGroupIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed/dashboard/$mangaId/$chapterId': {
       id: '/_authed/dashboard/$mangaId/$chapterId'
       path: '/$mangaId/$chapterId'
@@ -497,11 +718,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardMangaIdChapterIdRouteImport
       parentRoute: typeof AuthedDashboardRoute
     }
+    '/api/edit/manga/$id/': {
+      id: '/api/edit/manga/$id/'
+      path: '/api/edit/manga/$id'
+      fullPath: '/api/edit/manga/$id/'
+      preLoaderRoute: typeof ApiEditMangaIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edit/chapter/$id/': {
+      id: '/api/edit/chapter/$id/'
+      path: '/api/edit/chapter/$id'
+      fullPath: '/api/edit/chapter/$id/'
+      preLoaderRoute: typeof ApiEditChapterIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edit/chapter-group/$id/': {
+      id: '/api/edit/chapter-group/$id/'
+      path: '/api/edit/chapter-group/$id'
+      fullPath: '/api/edit/chapter-group/$id/'
+      preLoaderRoute: typeof ApiEditChapterGroupIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/manga/$id/chapter/$chapterId': {
       id: '/api/manga/$id/chapter/$chapterId'
       path: '/api/manga/$id/chapter/$chapterId'
       fullPath: '/api/manga/$id/chapter/$chapterId'
       preLoaderRoute: typeof ApiMangaIdChapterChapterIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edit/manga/$id/cover': {
+      id: '/api/edit/manga/$id/cover'
+      path: '/api/edit/manga/$id/cover'
+      fullPath: '/api/edit/manga/$id/cover'
+      preLoaderRoute: typeof ApiEditMangaIdCoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edit/chapter/$id/images': {
+      id: '/api/edit/chapter/$id/images'
+      path: '/api/edit/chapter/$id/images'
+      fullPath: '/api/edit/chapter/$id/images'
+      preLoaderRoute: typeof ApiEditChapterIdImagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edit/chapter-group/$id/chapters': {
+      id: '/api/edit/chapter-group/$id/chapters'
+      path: '/api/edit/chapter-group/$id/chapters'
+      fullPath: '/api/edit/chapter-group/$id/chapters'
+      preLoaderRoute: typeof ApiEditChapterGroupIdChaptersRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -554,18 +817,32 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSavedsRemoveRoute: ApiSavedsRemoveRoute,
   ApiMangaIndexRoute: ApiMangaIndexRoute,
   ApiSavedsIndexRoute: ApiSavedsIndexRoute,
+  ApiEditChapterGroupIdRoute: ApiEditChapterGroupIdRoute,
+  ApiEditChapterOrderRoute: ApiEditChapterOrderRoute,
+  ApiEditImagesDeleteRoute: ApiEditImagesDeleteRoute,
+  ApiEditImagesOrderRoute: ApiEditImagesOrderRoute,
+  ApiEditChapterGroupIndexRoute: ApiEditChapterGroupIndexRoute,
+  ApiEditChapterIndexRoute: ApiEditChapterIndexRoute,
+  ApiEditMangaIndexRoute: ApiEditMangaIndexRoute,
   ApiMangaIdIndexRoute: ApiMangaIdIndexRoute,
+  ApiEditChapterGroupIdChaptersRoute: ApiEditChapterGroupIdChaptersRoute,
+  ApiEditChapterIdImagesRoute: ApiEditChapterIdImagesRoute,
+  ApiEditMangaIdCoverRoute: ApiEditMangaIdCoverRoute,
   ApiMangaIdChapterChapterIdRoute: ApiMangaIdChapterChapterIdRoute,
+  ApiEditChapterGroupIdIndexRoute: ApiEditChapterGroupIdIndexRoute,
+  ApiEditChapterIdIndexRoute: ApiEditChapterIdIndexRoute,
+  ApiEditMangaIdIndexRoute: ApiEditMangaIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

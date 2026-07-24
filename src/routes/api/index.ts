@@ -8,7 +8,7 @@ export const Route = createFileRoute("/api/")({
         const response = {
           id: "mankai-server",
           authenticationEnabled: true,
-          editorEnabled: false, // TODO: implement after editable attribute inside the manga objects
+          editorEnabled: true,
           name: "Mankai Server",
           availableGenres: Object.values(Genre).filter((g) => g !== Genre.All),
           description:

@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 
 import MangaCard from "#/components/MangaCard";
 import { useNotification } from "#/components/notifications/useNotification";
@@ -15,46 +16,29 @@ import { Genre, GENRE_OPTIONS, Status, STATUS_OPTIONS } from "#/utils/types";
 
 import styles from "./index.module.scss";
 
-type MangaSearch = {
-  status?: Status;
-  genre?: Genre;
-  page?: number;
-  search?: string;
-};
-
-const MANGA_STATUS_VALUES = new Set(STATUS_OPTIONS.map((o) => o.value));
-const MANGA_GENRE_VALUES = new Set(GENRE_OPTIONS.map((o) => o.value));
+const mangaSearchSchema = z.object({
+  status: z.preprocess(
+    (value) => (value ? Number(value) : undefined),
+    z.enum(Status).catch(Status.Any).optional(),
+  ),
+  genre: z.preprocess(
+    (value) => (value ? value : undefined),
+    z.enum(Genre).catch(Genre.All).optional(),
+  ),
+  search: z.preprocess((value) => {
+    if (!value) return undefined;
+    const normalized = String(value).trim();
+    return normalized || undefined;
+  }, z.string().optional()),
+  page: z.preprocess((value) => {
+    if (!value) return undefined;
+    const rawPage = Number(value);
+    return Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1;
+  }, z.number().optional()),
+});
 
 export const Route = createFileRoute("/_authed/dashboard/")({
-  validateSearch: (search: Record<string, unknown>) => {
-    const parsed: MangaSearch = {};
-
-    if (search.status) {
-      const rawStatus = Number(search.status);
-      parsed.status = MANGA_STATUS_VALUES.has(rawStatus as Status)
-        ? (rawStatus as Status)
-        : Status.Any;
-    }
-
-    if (search.genre) {
-      parsed.genre = MANGA_GENRE_VALUES.has(search.genre as Genre)
-        ? (search.genre as Genre)
-        : Genre.All;
-    }
-
-    if (search.search) {
-      const value = String(search.search).trim();
-      if (value) parsed.search = value;
-    }
-
-    if (search.page) {
-      const rawPage = Number(search.page);
-      parsed.page =
-        Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1;
-    }
-
-    return parsed;
-  },
+  validateSearch: mangaSearchSchema,
   component: MangaView,
 });
 
