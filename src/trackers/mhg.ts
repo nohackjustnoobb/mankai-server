@@ -185,7 +185,7 @@ function parseChapterMarkup(
   html: string,
   headingSelector: string,
   source: string,
-): Record<string, TrackerChapter[]> {
+): TrackerManga["chapters"] {
   const rewriter = new HTMLRewriter();
   const headings = collectText(rewriter, headingSelector);
   const lists: RawChapterList[] = [];
@@ -235,7 +235,8 @@ function parseChapterMarkup(
     throw new Error(`Invalid ${source}: missing chapter lists`);
   }
 
-  const chapters: Record<string, TrackerChapter[]> = {};
+  const chapters: TrackerManga["chapters"] = [];
+  const chaptersByGroupTitle = new Map<string, TrackerChapter[]>();
   let chapterCount = 0;
   for (let index = 0; index < lists.length; index++) {
     const heading = textValue(headings.slots[index]);
@@ -247,7 +248,12 @@ function parseChapterMarkup(
     } else if (heading.includes("番外篇")) {
       groupName = "extra";
     }
-    const group = (chapters[groupName] ??= []);
+    let group = chaptersByGroupTitle.get(groupName);
+    if (!group) {
+      group = [];
+      chaptersByGroupTitle.set(groupName, group);
+      chapters.push({ title: groupName, chapters: group });
+    }
 
     for (const ul of lists[index]!.uls) {
       const ordered = [...ul].reverse();

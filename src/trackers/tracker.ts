@@ -55,11 +55,16 @@ function failedRetryIsDue(
 
 export type TrackerChapter = Omit<APIChapter, "locked">;
 
+export type TrackerChapterGroup = {
+  title: string;
+  chapters: TrackerChapter[];
+};
+
 export type TrackerManga = Omit<
   APIDetailedManga,
-  "latestChapter" | "chapters"
+  "latestChapter" | "chapters" | "editable"
 > & {
-  chapters: Record<string, TrackerChapter[]>;
+  chapters: TrackerChapterGroup[];
 };
 
 type PendingOrFailed = "pending" | "failed";
@@ -793,8 +798,8 @@ export default abstract class Tracker {
         throw new StaleJobError();
       }
 
-      const sourceChapter = Object.values(sourceManga.chapters)
-        .flat()
+      const sourceChapter = sourceManga.chapters
+        .flatMap((group) => group.chapters)
         .find((item) => item.id === candidate.id);
       if (!sourceChapter) {
         await this.requeueParentManga(candidate.trackingMangaId);
@@ -1032,11 +1037,22 @@ export default abstract class Tracker {
     }
 
     const groups: NormalizedGroup[] = [];
+    const groupTitles = new Set<string>();
     const chaptersById = new Map<string, NormalizedChapter>();
-    for (const [groupSequence, [groupTitle, sourceChapters]] of Object.entries(
-      details.chapters,
-    ).entries()) {
+    for (const [groupSequence, sourceGroup] of details.chapters.entries()) {
+      const groupTitle = sourceGroup.title.trim();
+      if (!groupTitle) {
+        throw new Error(
+          `Chapter group at sequence ${String(groupSequence)} has an invalid title`,
+        );
+      }
+      if (groupTitles.has(groupTitle)) {
+        throw new Error(`Duplicate chapter group title ${groupTitle}`);
+      }
+      groupTitles.add(groupTitle);
+
       const normalizedChapters: NormalizedChapter[] = [];
+      const sourceChapters = sourceGroup.chapters;
       for (let sequence = 0; sequence < sourceChapters.length; sequence++) {
         const sourceChapter = sourceChapters[sequence]!;
         if (!sourceChapter.id.trim()) {
@@ -1230,12 +1246,17 @@ export default abstract class Tracker {
             left.createdAt.getTime() - right.createdAt.getTime(),
         );
 
-      const chapters: Record<string, TrackerChapter[]> = {};
-      for (const groupRow of groupRows) {
-        chapters[groupRow.title] = [];
-      }
+      const chapters: TrackerChapterGroup[] = groupRows.map((groupRow) => ({
+        title: groupRow.title,
+        chapters: [],
+      }));
+      const chaptersByGroupTitle = new Map(
+        chapters.map((group) => [group.title, group.chapters]),
+      );
       for (const chapterRow of chapterRows) {
-        const group = chapters[chapterRow.trackingChapterGroupTitle];
+        const group = chaptersByGroupTitle.get(
+          chapterRow.trackingChapterGroupTitle,
+        );
         if (!group) continue;
         const item: TrackerChapter = {
           id: chapterRow.id,

@@ -4,7 +4,11 @@ import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import db from "#/lib/db.server";
 import { chapter, chapterGroup, manga } from "#/db/schema";
 import { Status, ReadingDirection } from "#/utils/types.ts";
-import type { APIChapter, APIDetailedManga } from "#/utils/api.server.ts";
+import type {
+  APIChapter,
+  APIChapterGroup,
+  APIDetailedManga,
+} from "#/utils/api.server.ts";
 
 const DEFAULT_GROUP_TITLE = "Untitled group";
 
@@ -29,19 +33,23 @@ function toAPIChapter(ch: ChapterRow): APIChapter {
   return item;
 }
 
-function groupKey(group: ChapterGroupRow, used: Set<string>): string {
+function groupTitle(group: ChapterGroupRow, used: Set<string>): string {
   const base = group.title?.trim() || DEFAULT_GROUP_TITLE;
-  // Disambiguate duplicate group titles so no chapters are silently lost.
   if (!used.has(base)) {
     used.add(base);
     return base;
   }
 
-  let key = `${base} (${group.id})`;
-  while (used.has(key)) key = `${base} (${group.id}) ${crypto.randomUUID()}`;
-  used.add(key);
+  const disambiguated = `${base} (${group.id})`;
+  let title = disambiguated;
+  let suffix = 2;
+  while (used.has(title)) {
+    title = `${disambiguated} ${String(suffix)}`;
+    suffix++;
+  }
+  used.add(title);
 
-  return key;
+  return title;
 }
 
 export const Route = createFileRoute("/api/manga/$id/")({
@@ -83,12 +91,13 @@ export const Route = createFileRoute("/api/manga/$id/")({
           }
         }
 
-        const usedKeys = new Set<string>();
-        const chapters: Record<string, APIChapter[]> = {};
-        for (const group of detail.chapterGroups) {
-          chapters[groupKey(group, usedKeys)] =
-            group.chapters.map(toAPIChapter);
-        }
+        const usedTitles = new Set<string>();
+        const chapters: APIChapterGroup[] = detail.chapterGroups.map(
+          (group) => ({
+            title: groupTitle(group, usedTitles),
+            chapters: group.chapters.map(toAPIChapter),
+          }),
+        );
 
         const coverId = detail.cover?.id ?? null;
 

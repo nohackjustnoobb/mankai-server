@@ -9,6 +9,11 @@ export interface APIChapter {
   locked?: boolean;
 }
 
+export interface APIChapterGroup {
+  title: string;
+  chapters: APIChapter[];
+}
+
 export interface APIManga {
   id: string;
   title?: string;
@@ -24,7 +29,7 @@ export interface APIDetailedManga extends APIManga {
   updatedAt?: number;
   authors: string[];
   genres: Genre[];
-  chapters: Record<string, APIChapter[]>;
+  chapters: APIChapterGroup[];
   remarks?: string;
   editable?: boolean;
 }

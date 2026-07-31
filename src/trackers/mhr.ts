@@ -154,15 +154,21 @@ export default class MhrTracker extends Tracker {
         }))
         .reverse();
 
-    const chapters: Record<string, TrackerChapter[]> = {};
+    const chapters: TrackerManga["chapters"] = [];
     const serials = toChapters(data.mangaWords);
-    if (serials.length > 0) chapters.serial = serials;
+    if (serials.length > 0) {
+      chapters.push({ title: "serial", chapters: serials });
+    }
 
     const extras = toChapters(data.mangaEpisode);
-    if (extras.length > 0) chapters.extra = extras;
+    if (extras.length > 0) {
+      chapters.push({ title: "extra", chapters: extras });
+    }
 
     const volumes = toChapters(data.mangaRolls);
-    if (volumes.length > 0) chapters.volume = volumes;
+    if (volumes.length > 0) {
+      chapters.push({ title: "volume", chapters: volumes });
+    }
 
     const theme = Array.isArray(data.mangaTheme)
       ? data.mangaTheme.join(",")
