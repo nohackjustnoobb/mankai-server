@@ -6,7 +6,11 @@ import { apiAuthMiddleware } from "#/middleware/auth.ts";
 
 const querySchema = z.object({
   mangaId: z.string().trim().min(1, "Manga ID is required"),
-  title: z.string().trim().min(1, "Title is required"),
+  index: z
+    .string()
+    .regex(/^\d+$/, "Index must be a non-negative integer")
+    .transform(Number)
+    .pipe(z.number().safe()),
 });
 
 export const Route = createFileRoute("/api/edit/chapter-group/id")({
@@ -17,7 +21,7 @@ export const Route = createFileRoute("/api/edit/chapter-group/id")({
         const searchParams = new URL(request.url).searchParams;
         const parsed = querySchema.safeParse({
           mangaId: searchParams.get("mangaId"),
-          title: searchParams.get("title"),
+          index: searchParams.get("index"),
         });
         if (!parsed.success) {
           return Response.json(
@@ -30,9 +34,10 @@ export const Route = createFileRoute("/api/edit/chapter-group/id")({
         }
 
         const row = await db.query.chapterGroup.findFirst({
-          where: parsed.data,
+          where: { mangaId: parsed.data.mangaId },
           columns: { id: true },
           orderBy: { sequence: "asc" },
+          offset: parsed.data.index,
         });
 
         return Response.json({ id: row?.id ?? null });
