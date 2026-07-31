@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { chapterGroup, image } from "#/db/schema.ts";
 import db from "#/lib/db.server.ts";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import { CHAPTER_IMAGES_DIR } from "#/utils/image.server.ts";
 
@@ -61,9 +62,9 @@ export const Route = createFileRoute("/api/edit/chapter-group/$id/")({
               .where(eq(chapterGroup.id, parsedParams.data.id));
           });
         } catch (databaseError) {
-          console.error(
-            "Failed to delete editor chapter group:",
-            databaseError,
+          apiLogger.error(
+            { err: databaseError },
+            "failed to delete editor chapter group",
           );
           return Response.json(
             { message: "Failed to delete chapter group" },

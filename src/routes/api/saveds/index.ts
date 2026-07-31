@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import db from "#/lib/db.server";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { saved } from "#/db/schema";
 import {
   parsePagination,
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/api/saveds/")({
           const saveds = await fetchActiveSaveds(userId, pagination);
           return Response.json(saveds);
         } catch (error) {
-          console.error(error);
+          apiLogger.error({ err: error }, "failed to retrieve saved items");
           return Response.json(
             { error: "Failed to retrieve saved items" },
             { status: 400 },
@@ -172,7 +173,7 @@ export const Route = createFileRoute("/api/saveds/")({
             saveds: allResults,
           });
         } catch (error) {
-          console.error(error);
+          apiLogger.error({ err: error }, "failed to save item");
           return Response.json(
             { error: "Failed to save item" },
             { status: 400 },

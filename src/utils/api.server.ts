@@ -15,6 +15,7 @@ export interface APIManga {
   cover?: string;
   status?: Status;
   latestChapter?: APIChapter;
+  meta?: string;
 }
 
 export interface APIDetailedManga extends APIManga {

@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { chapter, chapterGroup, manga } from "#/db/schema.ts";
 import db from "#/lib/db.server.ts";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 
 const chapterRequestSchema = z.object({
@@ -127,7 +128,10 @@ export const Route = createFileRoute("/api/edit/chapter/")({
             }
             return Response.json({ id: updated.id });
           } catch (databaseError) {
-            console.error("Failed to update editor chapter:", databaseError);
+            apiLogger.error(
+              { err: databaseError },
+              "failed to update editor chapter",
+            );
             return Response.json(
               { message: "Failed to save chapter" },
               { status: 500 },
@@ -179,7 +183,10 @@ export const Route = createFileRoute("/api/edit/chapter/")({
 
           return Response.json({ id: created.id });
         } catch (databaseError) {
-          console.error("Failed to create editor chapter:", databaseError);
+          apiLogger.error(
+            { err: databaseError },
+            "failed to create editor chapter",
+          );
           return Response.json(
             { message: "Failed to save chapter" },
             { status: 500 },

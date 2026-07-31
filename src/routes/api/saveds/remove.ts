@@ -3,6 +3,7 @@ import { and, eq, or } from "drizzle-orm";
 
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import db from "#/lib/db.server";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { saved } from "#/db/schema";
 
 type RemoveItem = {
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/api/saveds/remove")({
                 ),
               );
           } catch (error) {
-            console.error(error);
+            apiLogger.error({ err: error }, "failed to remove saved items");
             return Response.json(
               { error: "Failed to remove items" },
               { status: 500 },

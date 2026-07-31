@@ -3,6 +3,7 @@ import { cosineDistance } from "drizzle-orm";
 
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import db from "#/lib/db.server";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { embed } from "#/utils/embedding.server";
 
 const SUGGESTION_LIMIT = 5;
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/api/suggestion")({
           try {
             searchEmbedding = await embed(search);
           } catch (err) {
-            console.error("Failed to embed search query:", err);
+            apiLogger.warn({ err }, "failed to embed suggestion query");
           }
         }
 

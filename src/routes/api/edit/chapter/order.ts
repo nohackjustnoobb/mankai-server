@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { chapter, chapterGroup } from "#/db/schema.ts";
 import db from "#/lib/db.server.ts";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 
 const orderRequestSchema = z
@@ -118,7 +119,10 @@ export const Route = createFileRoute("/api/edit/chapter/order")({
 
           return new Response(null, { status: 204 });
         } catch (databaseError) {
-          console.error("Failed to order editor chapters:", databaseError);
+          apiLogger.error(
+            { err: databaseError },
+            "failed to order editor chapters",
+          );
           return Response.json(
             { message: "Failed to order chapters" },
             { status: 500 },

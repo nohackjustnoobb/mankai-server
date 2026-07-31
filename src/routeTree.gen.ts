@@ -33,6 +33,7 @@ import { Route as ApiEditMangaIndexRouteImport } from './routes/api/edit/manga/i
 import { Route as ApiEditChapterIndexRouteImport } from './routes/api/edit/chapter/index'
 import { Route as ApiEditChapterGroupIndexRouteImport } from './routes/api/edit/chapter-group/index'
 import { Route as AuthedDashboardUserIndexRouteImport } from './routes/_authed/dashboard/user/index'
+import { Route as AuthedDashboardTrackerIndexRouteImport } from './routes/_authed/dashboard/tracker/index'
 import { Route as AuthedDashboardMangaIdIndexRouteImport } from './routes/_authed/dashboard/$mangaId/index'
 import { Route as ApiEditImagesOrderRouteImport } from './routes/api/edit/images/order'
 import { Route as ApiEditImagesDeleteRouteImport } from './routes/api/edit/images/delete'
@@ -168,6 +169,12 @@ const AuthedDashboardUserIndexRoute =
     path: '/user/',
     getParentRoute: () => AuthedDashboardRoute,
   } as any)
+const AuthedDashboardTrackerIndexRoute =
+  AuthedDashboardTrackerIndexRouteImport.update({
+    id: '/tracker/',
+    path: '/tracker/',
+    getParentRoute: () => AuthedDashboardRoute,
+  } as any)
 const AuthedDashboardMangaIdIndexRoute =
   AuthedDashboardMangaIdIndexRouteImport.update({
     id: '/$mangaId/',
@@ -264,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/api/edit/images/delete': typeof ApiEditImagesDeleteRoute
   '/api/edit/images/order': typeof ApiEditImagesOrderRoute
   '/dashboard/$mangaId/': typeof AuthedDashboardMangaIdIndexRoute
+  '/dashboard/tracker/': typeof AuthedDashboardTrackerIndexRoute
   '/dashboard/user/': typeof AuthedDashboardUserIndexRoute
   '/api/edit/chapter-group/': typeof ApiEditChapterGroupIndexRoute
   '/api/edit/chapter/': typeof ApiEditChapterIndexRoute
@@ -301,6 +309,7 @@ export interface FileRoutesByTo {
   '/api/edit/images/delete': typeof ApiEditImagesDeleteRoute
   '/api/edit/images/order': typeof ApiEditImagesOrderRoute
   '/dashboard/$mangaId': typeof AuthedDashboardMangaIdIndexRoute
+  '/dashboard/tracker': typeof AuthedDashboardTrackerIndexRoute
   '/dashboard/user': typeof AuthedDashboardUserIndexRoute
   '/api/edit/chapter-group': typeof ApiEditChapterGroupIndexRoute
   '/api/edit/chapter': typeof ApiEditChapterIndexRoute
@@ -341,6 +350,7 @@ export interface FileRoutesById {
   '/api/edit/images/delete': typeof ApiEditImagesDeleteRoute
   '/api/edit/images/order': typeof ApiEditImagesOrderRoute
   '/_authed/dashboard/$mangaId/': typeof AuthedDashboardMangaIdIndexRoute
+  '/_authed/dashboard/tracker/': typeof AuthedDashboardTrackerIndexRoute
   '/_authed/dashboard/user/': typeof AuthedDashboardUserIndexRoute
   '/api/edit/chapter-group/': typeof ApiEditChapterGroupIndexRoute
   '/api/edit/chapter/': typeof ApiEditChapterIndexRoute
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/api/edit/images/delete'
     | '/api/edit/images/order'
     | '/dashboard/$mangaId/'
+    | '/dashboard/tracker/'
     | '/dashboard/user/'
     | '/api/edit/chapter-group/'
     | '/api/edit/chapter/'
@@ -418,6 +429,7 @@ export interface FileRouteTypes {
     | '/api/edit/images/delete'
     | '/api/edit/images/order'
     | '/dashboard/$mangaId'
+    | '/dashboard/tracker'
     | '/dashboard/user'
     | '/api/edit/chapter-group'
     | '/api/edit/chapter'
@@ -457,6 +469,7 @@ export interface FileRouteTypes {
     | '/api/edit/images/delete'
     | '/api/edit/images/order'
     | '/_authed/dashboard/$mangaId/'
+    | '/_authed/dashboard/tracker/'
     | '/_authed/dashboard/user/'
     | '/api/edit/chapter-group/'
     | '/api/edit/chapter/'
@@ -676,6 +689,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardUserIndexRouteImport
       parentRoute: typeof AuthedDashboardRoute
     }
+    '/_authed/dashboard/tracker/': {
+      id: '/_authed/dashboard/tracker/'
+      path: '/tracker'
+      fullPath: '/dashboard/tracker/'
+      preLoaderRoute: typeof AuthedDashboardTrackerIndexRouteImport
+      parentRoute: typeof AuthedDashboardRoute
+    }
     '/_authed/dashboard/$mangaId/': {
       id: '/_authed/dashboard/$mangaId/'
       path: '/$mangaId'
@@ -774,6 +794,7 @@ interface AuthedDashboardRouteChildren {
   AuthedDashboardIndexRoute: typeof AuthedDashboardIndexRoute
   AuthedDashboardMangaIdChapterIdRoute: typeof AuthedDashboardMangaIdChapterIdRoute
   AuthedDashboardMangaIdIndexRoute: typeof AuthedDashboardMangaIdIndexRoute
+  AuthedDashboardTrackerIndexRoute: typeof AuthedDashboardTrackerIndexRoute
   AuthedDashboardUserIndexRoute: typeof AuthedDashboardUserIndexRoute
 }
 
@@ -781,6 +802,7 @@ const AuthedDashboardRouteChildren: AuthedDashboardRouteChildren = {
   AuthedDashboardIndexRoute: AuthedDashboardIndexRoute,
   AuthedDashboardMangaIdChapterIdRoute: AuthedDashboardMangaIdChapterIdRoute,
   AuthedDashboardMangaIdIndexRoute: AuthedDashboardMangaIdIndexRoute,
+  AuthedDashboardTrackerIndexRoute: AuthedDashboardTrackerIndexRoute,
   AuthedDashboardUserIndexRoute: AuthedDashboardUserIndexRoute,
 }
 

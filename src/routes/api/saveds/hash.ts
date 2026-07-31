@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash } from "node:crypto";
 
-import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import db from "#/lib/db.server";
+import { apiLogger } from "#/lib/logger.server.ts";
+import { apiAuthMiddleware } from "#/middleware/auth.ts";
 
 export const Route = createFileRoute("/api/saveds/hash")({
   server: {
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/api/saveds/hash")({
 
           return Response.json({ hash });
         } catch (error) {
-          console.error(error);
+          apiLogger.error({ err: error }, "failed to generate saved-item hash");
           return Response.json(
             { error: "Failed to generate hash" },
             { status: 400 },

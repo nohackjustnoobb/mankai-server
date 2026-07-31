@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { image, manga } from "#/db/schema.ts";
 import db from "#/lib/db.server.ts";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import { MANGA_IMAGES_DIR, MAX_IMAGE_BYTES } from "#/utils/image.server.ts";
 
@@ -61,7 +62,10 @@ export const Route = createFileRoute("/api/edit/manga/$id/cover")({
             .bytes();
           await Bun.write(newFilePath, webpBytes);
         } catch (imageError) {
-          console.error("Failed to encode editor cover:", imageError);
+          apiLogger.error(
+            { err: imageError },
+            "failed to encode editor cover",
+          );
           return Response.json(
             { message: "Invalid cover image data" },
             { status: 400 },
@@ -90,7 +94,10 @@ export const Route = createFileRoute("/api/edit/manga/$id/cover")({
             });
           });
         } catch (databaseError) {
-          console.error("Failed to save editor cover:", databaseError);
+          apiLogger.error(
+            { err: databaseError },
+            "failed to save editor cover",
+          );
           try {
             await unlink(newFilePath);
           } catch {}

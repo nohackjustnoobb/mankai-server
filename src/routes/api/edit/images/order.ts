@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { chapter, image } from "#/db/schema.ts";
 import db from "#/lib/db.server.ts";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import { parseChapterImageReference } from "#/utils/image.server.ts";
 
@@ -138,7 +139,10 @@ export const Route = createFileRoute("/api/edit/images/order")({
 
           return new Response(null, { status: 204 });
         } catch (databaseError) {
-          console.error("Failed to order editor images:", databaseError);
+          apiLogger.error(
+            { err: databaseError },
+            "failed to order editor images",
+          );
           return Response.json(
             { message: "Failed to order images" },
             { status: 500 },

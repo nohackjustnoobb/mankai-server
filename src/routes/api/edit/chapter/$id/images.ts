@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { chapter, image } from "#/db/schema.ts";
 import db from "#/lib/db.server.ts";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import {
   BASE64_IMAGE_RE,
@@ -100,7 +101,10 @@ export const Route = createFileRoute("/api/edit/chapter/$id/images")({
                 .bytes();
               await Bun.write(`${CHAPTER_IMAGES_DIR}/${id}.webp`, webpBytes);
             } catch (error) {
-              console.error("Failed to encode/write chapter image:", error);
+              apiLogger.error(
+                { err: error },
+                "failed to encode chapter image",
+              );
               return { ok: false, error: "Failed to save images" } as const;
             }
 
@@ -151,9 +155,9 @@ export const Route = createFileRoute("/api/edit/chapter/$id/images")({
             );
           });
         } catch (databaseError) {
-          console.error(
-            "Failed to persist editor chapter images:",
-            databaseError,
+          apiLogger.error(
+            { err: databaseError },
+            "failed to persist editor chapter images",
           );
 
           await Promise.allSettled(writtenPaths.map((path) => unlink(path)));

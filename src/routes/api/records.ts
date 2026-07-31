@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import {
   parsePagination,
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/api/records")({
           const records = await fetchRecords(userId, pagination);
           return Response.json(records);
         } catch (error) {
-          console.error(error);
+          apiLogger.error({ err: error }, "failed to retrieve record items");
           return Response.json(
             { error: "Failed to retrieve record items" },
             { status: 400 },

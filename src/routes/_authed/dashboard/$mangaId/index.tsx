@@ -7,15 +7,17 @@ import {
 } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  Activity,
   ArrowUpDown,
   BookOpen,
   FilePlus,
   FolderPlus,
   Lock,
   Pencil,
+  SquareStop,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useNotification } from "#/components/notifications/useNotification";
 import { useDashboardNav } from "#/context/DashboardNav";
@@ -38,6 +40,13 @@ import {
   getMangaFn,
 } from "#/utils/manga.functions";
 import {
+  addTrackingMangaFn,
+  getMangaTrackingFn,
+  removeTrackingMangaFn,
+  type TrackerState,
+  type TrackerSummary,
+} from "#/utils/tracker.functions";
+import {
   GENRE_OPTIONS,
   READING_DIRECTION_OPTIONS,
   STATUS_OPTIONS,
@@ -50,9 +59,12 @@ import styles from "./index.module.scss";
 
 export const Route = createFileRoute("/_authed/dashboard/$mangaId/")({
   loader: async ({ params }) => {
-    const manga = await getMangaFn({ data: { id: params.mangaId } });
+    const [manga, tracking] = await Promise.all([
+      getMangaFn({ data: { id: params.mangaId } }),
+      getMangaTrackingFn({ data: { mangaId: params.mangaId } }),
+    ]);
     if (!manga) throw notFound();
-    return manga;
+    return { manga, tracking };
   },
   component: MangaDetailsView,
 });
@@ -71,12 +83,22 @@ function readingDirectionLabel(d: number | null): string | null {
   return READING_DIRECTION_OPTIONS.find((o) => o.value === d)?.label ?? null;
 }
 
-function formatDate(d: Date): string {
+function formatDate(d: Date | string): string {
   return new Date(d).toLocaleString(undefined, {
     dateStyle: "medium",
     timeStyle: "short",
   });
 }
+
+const TRACKER_STATE_LABELS: Record<TrackerState, string> = {
+  queued: "Queued",
+  importing: "Importing",
+  retrying: "Retrying",
+  upToDate: "Up to date",
+  paused: "Paused",
+};
+
+const TRACKER_POLL_INTERVAL_MS = 10_000;
 
 function MangaDetailsView() {
   const router = useRouter();
@@ -86,12 +108,21 @@ function MangaDetailsView() {
   const deleteChapterGroup = useServerFn(deleteChapterGroupFn);
   const arrangeChapterGroups = useServerFn(arrangeChapterGroupsFn);
   const arrangeChapters = useServerFn(arrangeChaptersFn);
+  const addTrackingManga = useServerFn(addTrackingMangaFn);
+  const getMangaTracking = useServerFn(getMangaTrackingFn);
+  const removeTrackingManga = useServerFn(removeTrackingMangaFn);
   const { setItems } = useDashboardNav();
-  const manga = Route.useLoaderData();
+  const { manga, tracking: initialTracking } = Route.useLoaderData();
   const { user } = Route.useRouteContext();
 
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showStopTracking, setShowStopTracking] = useState(false);
+  const [tracking, setTracking] = useState<TrackerSummary | null>(
+    initialTracking,
+  );
+  const refreshTrackingRef = useRef<() => Promise<void>>(async () => undefined);
+  const [updatingTracking, setUpdatingTracking] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [showArrangeGroups, setShowArrangeGroups] = useState(false);
   const [createChapterGroupId, setCreateChapterGroupId] = useState<
@@ -125,6 +156,97 @@ function MangaDetailsView() {
       window.removeEventListener(MANGA_UPDATED_EVENT, handleMangaUpdated);
     };
   }, [router]);
+
+  useEffect(() => {
+    setTracking(initialTracking);
+  }, [initialTracking]);
+
+  useEffect(() => {
+    if (!initialTracking) return;
+
+    let cancelled = false;
+    let requestInFlight = false;
+    let refreshQueued = false;
+    let requestGeneration = 0;
+    let pollTimer: number | undefined;
+
+    function clearPollTimer() {
+      if (pollTimer !== undefined) {
+        window.clearTimeout(pollTimer);
+        pollTimer = undefined;
+      }
+    }
+
+    function schedulePoll() {
+      clearPollTimer();
+      if (cancelled || document.visibilityState !== "visible") return;
+      pollTimer = window.setTimeout(() => {
+        void pollTracking();
+      }, TRACKER_POLL_INTERVAL_MS);
+    }
+
+    async function pollTracking() {
+      if (cancelled) return;
+      if (requestInFlight) {
+        requestGeneration += 1;
+        refreshQueued = true;
+        return;
+      }
+      if (document.visibilityState !== "visible") {
+        refreshQueued = true;
+        return;
+      }
+
+      clearPollTimer();
+      refreshQueued = false;
+      requestInFlight = true;
+      const generation = ++requestGeneration;
+      try {
+        const nextTracking = await getMangaTracking({
+          data: { mangaId: manga.id },
+        });
+        if (!cancelled && generation === requestGeneration) {
+          setTracking(nextTracking);
+        }
+      } catch (error) {
+        console.error("Could not poll tracking status:", error);
+      } finally {
+        requestInFlight = false;
+        if (cancelled) return;
+
+        if (
+          refreshQueued &&
+          document.visibilityState === "visible"
+        ) {
+          refreshQueued = false;
+          void pollTracking();
+        } else {
+          schedulePoll();
+        }
+      }
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        void pollTracking();
+      } else {
+        clearPollTimer();
+      }
+    }
+
+    refreshTrackingRef.current = pollTracking;
+    schedulePoll();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      cancelled = true;
+      clearPollTimer();
+      if (refreshTrackingRef.current === pollTracking) {
+        refreshTrackingRef.current = async () => undefined;
+      }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [getMangaTracking, initialTracking, manga.id]);
 
   const title = manga.title?.trim() || "Untitled";
   const status = statusLabel(manga.status);
@@ -192,6 +314,70 @@ function MangaDetailsView() {
     } catch (err) {
       console.error(err);
       notify.failed("Could not delete group. Please try again.", {
+        title: "Error",
+      });
+    }
+  }
+
+  async function handleTrackUpdates() {
+    if (!tracking || updatingTracking) return;
+    setUpdatingTracking(true);
+    try {
+      const result = await addTrackingManga({
+        data: {
+          trackingId: tracking.trackingId,
+          trackingMangaId: tracking.trackingMangaId,
+        },
+      });
+      if (result.ok) {
+        if (result.changed) {
+          notify.success("Manga added to your tracker.");
+        } else {
+          notify.warning("You are already tracking this manga.");
+        }
+        setTracking((current) =>
+          current ? { ...current, isSubscribed: true } : current,
+        );
+        await refreshTrackingRef.current();
+      } else {
+        notify.failed(result.error, { title: "Could not track manga" });
+      }
+    } catch (err) {
+      console.error(err);
+      notify.failed("Could not track manga. Please try again.", {
+        title: "Error",
+      });
+    } finally {
+      setUpdatingTracking(false);
+    }
+  }
+
+  async function handleStopTracking() {
+    if (!tracking) return;
+    try {
+      const result = await removeTrackingManga({
+        data: {
+          trackingId: tracking.trackingId,
+          trackingMangaId: tracking.trackingMangaId,
+        },
+      });
+      if (result.ok) {
+        if (result.changed) {
+          notify.success("Manga removed from your tracker.");
+        } else {
+          notify.warning("This manga was already removed from your tracker.");
+        }
+        setShowStopTracking(false);
+        setTracking((current) =>
+          current ? { ...current, isSubscribed: false } : current,
+        );
+        await refreshTrackingRef.current();
+      } else {
+        notify.failed(result.error, { title: "Could not stop tracking" });
+      }
+    } catch (err) {
+      console.error(err);
+      notify.failed("Could not stop tracking. Please try again.", {
         title: "Error",
       });
     }
@@ -301,6 +487,84 @@ function MangaDetailsView() {
           </div>
         )}
       </div>
+
+      {tracking && (
+        <section className={styles.tracking}>
+          <div className={styles.trackingHeader}>
+            <div className={styles.trackingTitle}>
+              <Activity size={18} />
+              <h2>Tracking</h2>
+            </div>
+            <div className={styles.trackingActions}>
+              {tracking.isSubscribed ? (
+                <button
+                  type="button"
+                  className="outlineButton"
+                  onClick={() => setShowStopTracking(true)}
+                  disabled={updatingTracking}
+                >
+                  <SquareStop size={16} />
+                  <span>Stop tracking</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.trackButton}
+                  onClick={handleTrackUpdates}
+                  disabled={updatingTracking}
+                >
+                  <Activity size={16} />
+                  <span>
+                    {updatingTracking ? "Adding…" : "Track updates"}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.trackingDetails}>
+            <span
+              className={`${styles.trackingBadge} ${styles[tracking.state]}`}
+            >
+              {TRACKER_STATE_LABELS[tracking.state]}
+            </span>
+            <span>
+              <strong>Source:</strong> {tracking.trackerName}
+            </span>
+            <span>
+              <strong>Manga ID:</strong> {tracking.trackingMangaId}
+            </span>
+            <span>
+              <strong>Last activity:</strong>{" "}
+              {formatDate(tracking.lastActivityAt)}
+            </span>
+          </div>
+
+          <div className={styles.trackingProgress}>
+            <div className={styles.trackingProgressItem}>
+              <span className={styles.trackingProgressLabel}>Chapters</span>
+              <span className={styles.trackingProgressValue}>
+                {tracking.chapters.completed} / {tracking.chapters.total}
+              </span>
+            </div>
+            <div className={styles.trackingProgressItem}>
+              <span className={styles.trackingProgressLabel}>Pages</span>
+              <span className={styles.trackingProgressValue}>
+                {tracking.images.completed} / {tracking.images.total}
+              </span>
+            </div>
+          </div>
+
+          {tracking.failedReason && (
+            <div className={styles.trackingError}>
+              <span className={styles.trackingErrorLabel}>Latest error</span>
+              <span className={styles.trackingErrorValue}>
+                {tracking.failedReason}
+              </span>
+            </div>
+          )}
+        </section>
+      )}
 
       <div className={styles.chapters}>
         <div className={styles.chaptersHeader}>
@@ -447,6 +711,24 @@ function MangaDetailsView() {
           variant="danger"
           onConfirm={handleDelete}
           onClose={() => setShowDelete(false)}
+        />
+      )}
+
+      {showStopTracking && tracking && (
+        <ConfirmModal
+          title="Stop tracking manga"
+          message={
+            <>
+              Stop tracking <strong>{title}</strong>? Imported content will stay
+              in the library, and tracking may continue if another user still
+              follows it.
+            </>
+          }
+          confirmLabel="Stop tracking"
+          loadingLabel="Stopping…"
+          variant="danger"
+          onConfirm={handleStopTracking}
+          onClose={() => setShowStopTracking(false)}
         />
       )}
 

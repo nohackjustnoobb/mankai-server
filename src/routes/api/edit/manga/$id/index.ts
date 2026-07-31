@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { image, manga } from "#/db/schema.ts";
 import db from "#/lib/db.server.ts";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import { CHAPTER_IMAGES_DIR, MANGA_IMAGES_DIR } from "#/utils/image.server.ts";
 
@@ -64,7 +65,10 @@ export const Route = createFileRoute("/api/edit/manga/$id/")({
             await tx.delete(manga).where(eq(manga.id, parsedParams.data.id));
           });
         } catch (databaseError) {
-          console.error("Failed to delete editor manga:", databaseError);
+          apiLogger.error(
+            { err: databaseError },
+            "failed to delete editor manga",
+          );
           return Response.json(
             { message: "Failed to delete manga" },
             { status: 500 },

@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { chapter, chapterGroup, image, manga } from "#/db/schema.ts";
 import db from "#/lib/db.server.ts";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import {
   CHAPTER_IMAGES_DIR,
@@ -112,7 +113,10 @@ export const Route = createFileRoute("/api/edit/images/delete")({
             );
           }
 
-          console.error("Failed to delete editor images:", databaseError);
+          apiLogger.error(
+            { err: databaseError },
+            "failed to delete editor images",
+          );
           return Response.json(
             { message: "Failed to delete images" },
             { status: 500 },

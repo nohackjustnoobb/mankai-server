@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 
 import db from "#/lib/db.server";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { record, saved } from "#/db/schema";
 
 // ---------- Types ----------
@@ -176,7 +177,7 @@ export async function upsertRecords(
         setWhere: sql`excluded."datetime" > "record"."datetime"`,
       });
   } catch (e) {
-    console.error("Error upserting records:", e);
+    apiLogger.error({ err: e }, "failed to upsert records");
   }
 }
 
@@ -214,6 +215,6 @@ export async function upsertSaveds(
         setWhere: sql`excluded."datetime" > "saved"."datetime"`,
       });
   } catch (e) {
-    console.error("Error upserting saved:", e);
+    apiLogger.error({ err: e }, "failed to upsert saved items");
   }
 }

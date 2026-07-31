@@ -28,6 +28,7 @@ environment:
   # BASE_API_URL: https://api.example.app
   # EMBEDDING_QUANTIZED: "0"
   # FORCE_SECURE_COOKIE: "true"
+  # LOG_LEVEL: debug
 ```
 
 2. Build and start:

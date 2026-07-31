@@ -19,15 +19,24 @@ import {
   type DashboardNavContextValue,
   type NavItem,
 } from "#/context/DashboardNav";
+import TrackMangaModal from "#/modals/TrackMangaModal.tsx";
 import UpsertUserModal from "#/modals/UpsertUserModal.tsx";
 import UpsertMangaModal from "#/modals/UpsertMangaModal.tsx";
 import { logoutFn } from "#/utils/auth.functions";
 
 import styles from "./dashboard.module.scss";
 
+export type DashboardSection = "manga" | "tracker" | "user";
+
 export const Route = createFileRoute("/_authed/dashboard")({
   component: DashboardLayout,
 });
+
+function getDashboardSection(pathname: string): DashboardSection {
+  if (pathname.startsWith("/dashboard/user")) return "user";
+  if (pathname.startsWith("/dashboard/tracker")) return "tracker";
+  return "manga";
+}
 
 function DashboardLayout() {
   const { notify } = useNotification();
@@ -36,10 +45,13 @@ function DashboardLayout() {
   const navigate = useNavigate();
   const [showCreateManga, setShowCreateManga] = useState(false);
   const [showCreateUser, setShowCreateUser] = useState(false);
+  const [showTrackManga, setShowTrackManga] = useState(false);
   const [navItems, setNavItems] = useState<NavItem[]>([]);
   const { user } = Route.useRouteContext();
 
-  const isUserSection = location.pathname.startsWith("/dashboard/user");
+  const section = getDashboardSection(location.pathname);
+  const isUserSection = section === "user";
+  const isTrackerSection = section === "tracker";
   const isAdmin = user.role === "admin";
 
   const searchParams = useSearch({ strict: false });
@@ -49,7 +61,7 @@ function DashboardLayout() {
   function clearSearch() {
     const { search: _omit, ...rest } = searchParams;
     navigate({
-      to: isUserSection ? "/dashboard/user" : "/dashboard",
+      to: section === "user" ? "/dashboard/user" : "/dashboard",
       search: rest,
     });
   }
@@ -80,7 +92,11 @@ function DashboardLayout() {
               <span className={styles.title}>Mankai</span>
             </Link>
 
-            <SearchBar kind={isUserSection ? "user" : "manga"} />
+            {isTrackerSection ? (
+              <div className={styles.searchSpacer} />
+            ) : (
+              <SearchBar kind={isUserSection ? "user" : "manga"} />
+            )}
 
             <div className={styles.actions}>
               <ThemeToggle />
@@ -109,16 +125,20 @@ function DashboardLayout() {
                     label: "Manga",
                   },
                   {
+                    value: "tracker",
+                    label: "Tracker",
+                  },
+                  {
                     value: "user",
                     label: "User",
                   },
                 ]}
-                value={
-                  location.pathname.startsWith("/dashboard/user")
-                    ? "user"
-                    : "manga"
-                }
+                value={section}
                 onChange={(value) => {
+                  if (value === "tracker") {
+                    navigate({ to: "/dashboard/tracker" });
+                    return;
+                  }
                   navigate({
                     to: value === "user" ? "/dashboard/user" : "/dashboard",
                   });
@@ -152,7 +172,7 @@ function DashboardLayout() {
                   ))}
                 </ul>
               )}
-              {activeSearch && (
+              {!isTrackerSection && activeSearch && (
                 <div className={styles.searchLabel}>
                   <span className={styles.searchLabelText}>Search:</span>
                   <span className={styles.searchLabelQuery}>
@@ -173,14 +193,22 @@ function DashboardLayout() {
               className={styles.createButton}
               type="button"
               disabled={isUserSection && !isAdmin}
-              onClick={() =>
-                isUserSection
-                  ? setShowCreateUser(true)
-                  : setShowCreateManga(true)
-              }
+              onClick={() => {
+                if (isTrackerSection) {
+                  setShowTrackManga(true);
+                } else if (isUserSection) {
+                  setShowCreateUser(true);
+                } else {
+                  setShowCreateManga(true);
+                }
+              }}
             >
               <Plus size={18} />
-              {isUserSection ? "Create User" : "Create Manga"}
+              {isTrackerSection
+                ? "Track manga"
+                : isUserSection
+                  ? "Create User"
+                  : "Create Manga"}
             </button>
           </nav>
           <Outlet />
@@ -201,6 +229,10 @@ function DashboardLayout() {
 
       {showCreateUser && (
         <UpsertUserModal onClose={() => setShowCreateUser(false)} />
+      )}
+
+      {showTrackManga && (
+        <TrackMangaModal onClose={() => setShowTrackManga(false)} />
       )}
     </div>
   );

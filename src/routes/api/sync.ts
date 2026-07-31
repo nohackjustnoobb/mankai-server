@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import {
   parsePagination,
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/api/sync")({
           const data = await fetchSyncData(userId, pagination);
           return Response.json(data);
         } catch (error) {
-          console.error(error);
+          apiLogger.error({ err: error }, "failed to fetch sync data");
           return Response.json(
             { error: "Failed to fetch sync data" },
             { status: 400 },
@@ -76,7 +77,7 @@ export const Route = createFileRoute("/api/sync")({
           const data = await fetchSyncData(userId, pagination);
           return Response.json(data);
         } catch (error) {
-          console.error(error);
+          apiLogger.error({ err: error }, "failed to sync data");
           return Response.json({ error: "Failed to sync" }, { status: 400 });
         }
       },

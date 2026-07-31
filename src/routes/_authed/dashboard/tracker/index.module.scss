@@ -1,0 +1,237 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+
+  .summary {
+    margin: 0;
+    font-size: var(--font-size-base);
+    color: var(--sub-text-color);
+  }
+
+  .state {
+    padding: 2rem 0;
+    text-align: center;
+    font-size: var(--font-size-md);
+    color: var(--sub-text-color);
+  }
+
+  .tableWrap {
+    overflow-x: auto;
+    background-color: var(--sub-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+  }
+
+  .table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: var(--font-size-base);
+
+    .colSource {
+      width: 14%;
+    }
+
+    .colManga {
+      width: 25%;
+    }
+
+    .colStatus {
+      width: 17%;
+    }
+
+    .colProgress {
+      width: 18%;
+    }
+
+    .colActivity {
+      width: 21%;
+    }
+
+    .colActions {
+      width: 5%;
+    }
+
+    th,
+    td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    thead th {
+      font-size: var(--font-size-sm);
+      font-weight: bold;
+      color: var(--sub-text-color);
+      white-space: nowrap;
+      background-color: var(--input-background-color);
+    }
+
+    tbody tr {
+      transition: background-color 0.15s ease;
+
+      &:last-child td {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background-color: var(--input-background-color);
+      }
+    }
+  }
+
+  .source,
+  .manga,
+  .status,
+  .progress {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .source,
+  .manga,
+  .status {
+    gap: 0.25rem;
+  }
+
+  .sourceName,
+  .mangaLink,
+  .pendingTitle {
+    overflow: hidden;
+    font-weight: bold;
+    color: var(--text-color);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sourceDescription,
+  .externalId,
+  .failureReason {
+    overflow: hidden;
+    font-size: var(--font-size-sm);
+    color: var(--sub-text-color);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mangaLink {
+    text-decoration: none;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+
+  .externalId {
+    font-family: monospace;
+  }
+
+  .statusBadge {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
+
+    &.neutral {
+      color: var(--sub-text-color);
+      border-color: var(--border-color);
+    }
+
+    &.warning {
+      color: var(--warning-color);
+      border-color: var(--warning-color);
+    }
+
+    &.error {
+      color: var(--error-color);
+      border-color: var(--error-color);
+    }
+
+    &.success {
+      color: var(--success-color);
+      border-color: var(--success-color);
+    }
+  }
+
+  .failureReason {
+    color: var(--error-color);
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .progress {
+    gap: 0.25rem;
+
+    > span {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      color: var(--sub-text-color);
+    }
+
+    strong {
+      font-weight: bold;
+      color: var(--text-color);
+      white-space: nowrap;
+    }
+  }
+
+  .progressLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .activity {
+    color: var(--sub-text-color);
+    white-space: nowrap;
+  }
+
+  .actionsCell {
+    text-align: right;
+
+    button {
+      margin-left: auto;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .colActivity,
+    .activityCell {
+      display: none;
+    }
+
+    .table {
+      table-layout: auto;
+
+      th,
+      td {
+        padding: 0.5rem;
+      }
+
+      .colSource,
+      .colManga,
+      .colStatus,
+      .colProgress,
+      .colActions {
+        width: auto;
+      }
+    }
+  }
+}

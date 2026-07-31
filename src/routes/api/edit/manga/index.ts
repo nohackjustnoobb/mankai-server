@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { manga } from "#/db/schema.ts";
 import db from "#/lib/db.server.ts";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import { embed } from "#/utils/embedding.server.ts";
 import { Genre, Status } from "#/utils/types.ts";
@@ -85,7 +86,10 @@ export const Route = createFileRoute("/api/edit/manga/")({
           try {
             embedding = await embed(embeddingText);
           } catch (embeddingError) {
-            console.error("Failed to embed editor manga:", embeddingError);
+            apiLogger.warn(
+              { err: embeddingError },
+              "failed to embed editor manga",
+            );
           }
         }
 
@@ -136,7 +140,10 @@ export const Route = createFileRoute("/api/edit/manga/")({
           if (!created) throw new Error("Manga insert returned no row");
           return Response.json({ id: created.id });
         } catch (databaseError) {
-          console.error("Failed to upsert editor manga:", databaseError);
+          apiLogger.error(
+            { err: databaseError },
+            "failed to upsert editor manga",
+          );
           return Response.json(
             { message: "Failed to save manga" },
             { status: 500 },

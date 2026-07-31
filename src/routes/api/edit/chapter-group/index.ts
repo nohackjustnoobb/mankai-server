@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { chapterGroup, manga } from "#/db/schema.ts";
 import db from "#/lib/db.server.ts";
+import { apiLogger } from "#/lib/logger.server.ts";
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 
 const chapterGroupRequestSchema = z.object({
@@ -79,9 +80,9 @@ export const Route = createFileRoute("/api/edit/chapter-group/")({
             }
             return Response.json({ id: updated.id });
           } catch (databaseError) {
-            console.error(
-              "Failed to update editor chapter group:",
-              databaseError,
+            apiLogger.error(
+              { err: databaseError },
+              "failed to update editor chapter group",
             );
             return Response.json(
               { message: "Failed to save chapter group" },
@@ -132,9 +133,9 @@ export const Route = createFileRoute("/api/edit/chapter-group/")({
           }
           return Response.json({ id: created.id });
         } catch (databaseError) {
-          console.error(
-            "Failed to create editor chapter group:",
-            databaseError,
+          apiLogger.error(
+            { err: databaseError },
+            "failed to create editor chapter group",
           );
           return Response.json(
             { message: "Failed to save chapter group" },
