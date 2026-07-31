@@ -32,7 +32,7 @@ export const Route = createFileRoute("/api/search")({
           with: {
             cover: { columns: { id: true } },
             chapterGroups: {
-              orderBy: { sequence: "desc" },
+              orderBy: { sequence: "asc" },
               limit: 1,
               with: {
                 chapters: {
