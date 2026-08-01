@@ -1,3 +1,4 @@
+import { decodeHTML } from "entities";
 import { decompressFromBase64 } from "lz-string";
 
 import { trackerLogger } from "#/lib/logger.server.ts";
@@ -42,41 +43,8 @@ type RawChapterList = {
   uls: TrackerChapter[][];
 };
 
-const NAMED_ENTITIES: Record<string, string> = {
-  amp: "&",
-  apos: "'",
-  gt: ">",
-  lt: "<",
-  nbsp: "\u00a0",
-  quot: '"',
-};
-
-function decodeHtmlEntities(value: string): string {
-  return value.replace(
-    /&(#(?:x[0-9a-f]+|\d+)|[a-z][a-z\d]+);/gi,
-    (entity, body: string) => {
-      if (body.startsWith("#")) {
-        const hexadecimal = body[1]?.toLowerCase() === "x";
-        const digits = body.slice(hexadecimal ? 2 : 1);
-        const codePoint = Number.parseInt(digits, hexadecimal ? 16 : 10);
-        if (
-          Number.isNaN(codePoint) ||
-          codePoint === 0 ||
-          codePoint > 0x10ffff ||
-          (codePoint >= 0xd800 && codePoint <= 0xdfff)
-        ) {
-          return entity;
-        }
-        return String.fromCodePoint(codePoint);
-      }
-
-      return NAMED_ENTITIES[body.toLowerCase()] ?? entity;
-    },
-  );
-}
-
 function textValue(slot: TextSlot | undefined): string {
-  return decodeHtmlEntities(slot?.chunks.join("") ?? "").trim();
+  return decodeHTML(slot?.chunks.join("") ?? "").trim();
 }
 
 function removeActive<T>(active: T[], value: T): void {
@@ -166,7 +134,7 @@ function parseMhgUpdateFeed(html: string): Map<string, string> {
 
   const updates = new Map<string, string>();
   for (const item of items) {
-    const id = decodeHtmlEntities(item.href ?? "").match(/\d+/)?.[0];
+    const id = decodeHTML(item.href ?? "").match(/\d+/)?.[0];
     const revision = normalizeMhgLatestTitle(
       textValue(item.latest)
         .replace(/更新至|共/g, "")
@@ -215,7 +183,7 @@ function parseChapterMarkup(
       const ul = activeUls.at(-1);
       if (!ul) return;
 
-      const href = decodeHtmlEntities(element.getAttribute("href") ?? "")
+      const href = decodeHTML(element.getAttribute("href") ?? "")
         .trim()
         .split(/[?#]/u, 1)[0];
       const id = (href?.split("/").filter(Boolean).at(-1) ?? "").replace(
@@ -223,7 +191,7 @@ function parseChapterMarkup(
         "",
       );
       if (!id) return;
-      const title = decodeHtmlEntities(element.getAttribute("title") ?? "")
+      const title = decodeHTML(element.getAttribute("title") ?? "")
         .trim()
         .replace("话", "話");
       ul.push(title ? { id, title } : { id });
@@ -320,7 +288,7 @@ function parseMhgManga(id: string, html: string): TrackerManga {
   });
 
   transformHtml(rewriter, html, "MHG manga page");
-  const title = decodeHtmlEntities(coverImage?.alt ?? "").trim();
+  const title = decodeHTML(coverImage?.alt ?? "").trim();
   if (!foundBookCover || !coverImage || !title) {
     throw new Error("Invalid MHG manga page: missing book cover or title");
   }
@@ -348,13 +316,13 @@ function parseMhgManga(id: string, html: string): TrackerManga {
     .trim();
   const authors = authorTexts.slots.map(textValue).filter(Boolean);
   const genres = genreHrefs.flatMap((href) => {
-    const slug = decodeHtmlEntities(href).match(/\/list\/([^/]+)\//u)?.[1];
+    const slug = decodeHTML(href).match(/\/list\/([^/]+)\//u)?.[1];
     const genre = slug ? GENRES[slug] : undefined;
     return genre === undefined ? [] : [genre];
   });
   const updatedAtText = textValue(updatedText.slots[0]);
   const description = textValue(descriptionText.slots[0]);
-  let cover = decodeHtmlEntities(coverImage.src ?? "").trim();
+  let cover = decodeHTML(coverImage.src ?? "").trim();
   if (!cover) {
     throw new Error("Invalid MHG manga page: missing cover URL");
   }
