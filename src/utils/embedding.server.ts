@@ -12,12 +12,16 @@ const EMBEDDING_DTYPE =
     ? "fp32"
     : "q8";
 
+const EMBEDDING_CACHE_DIR =
+  process.env.EMBEDDING_CACHE_DIR?.trim() || undefined;
+
 let extractorPromise: Promise<FeatureExtractionPipeline> | null = null;
 
 async function getExtractor(): Promise<FeatureExtractionPipeline> {
   if (!extractorPromise) {
     extractorPromise = pipeline("feature-extraction", EMBEDDING_MODEL, {
       dtype: EMBEDDING_DTYPE,
+      cache_dir: EMBEDDING_CACHE_DIR,
     }).catch((error) => {
       extractorPromise = null;
       throw error;

@@ -26,6 +26,7 @@ services:
     volumes:
       - ./data:/app/data
     environment:
+      EMBEDDING_CACHE_DIR: /app/data/transformers-cache
       USE_PGLITE: "0"
       DATABASE_URL: postgresql://mankai:mankai@postgres:5432/mankai
       SESSION_SECRET: changeme123-make-sure-it-is-at-least-32-characters
