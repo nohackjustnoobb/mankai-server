@@ -93,10 +93,14 @@ export const Route = createFileRoute("/api/manga/$id/")({
 
         const usedTitles = new Set<string>();
         const chapters: APIChapterGroup[] = detail.chapterGroups.map(
-          (group) => ({
-            title: groupTitle(group, usedTitles),
-            chapters: group.chapters.map(toAPIChapter),
-          }),
+          (group) => {
+            const item: APIChapterGroup = {
+              id: group.id,
+              title: groupTitle(group, usedTitles),
+              chapters: group.chapters.map(toAPIChapter),
+            };
+            return item;
+          },
         );
 
         const coverId = detail.cover?.id ?? null;

@@ -10,6 +10,7 @@ export interface APIChapter {
 }
 
 export interface APIChapterGroup {
+  id?: string;
   title: string;
   chapters: APIChapter[];
 }
