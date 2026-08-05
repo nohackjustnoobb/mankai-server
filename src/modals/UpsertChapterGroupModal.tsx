@@ -104,7 +104,7 @@ export default function UpsertChapterGroupModal({
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Volume, Serial"
+            placeholder="e.g. Volume, Series"
             autoFocus
           />
         </label>

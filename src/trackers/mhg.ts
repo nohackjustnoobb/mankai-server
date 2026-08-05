@@ -210,7 +210,7 @@ function parseChapterMarkup(
     const heading = textValue(headings.slots[index]);
     let groupName = heading || `Group ${String(index + 1)}`;
     if (heading.includes("單話") || heading.includes("单话")) {
-      groupName = "serial";
+      groupName = "series";
     } else if (heading.includes("單行本") || heading.includes("单行本")) {
       groupName = "volume";
     } else if (heading.includes("番外篇")) {

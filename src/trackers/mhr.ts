@@ -155,9 +155,9 @@ export default class MhrTracker extends Tracker {
         .reverse();
 
     const chapters: TrackerManga["chapters"] = [];
-    const serials = toChapters(data.mangaWords);
-    if (serials.length > 0) {
-      chapters.push({ title: "serial", chapters: serials });
+    const series = toChapters(data.mangaWords);
+    if (series.length > 0) {
+      chapters.push({ title: "series", chapters: series });
     }
 
     const extras = toChapters(data.mangaEpisode);
