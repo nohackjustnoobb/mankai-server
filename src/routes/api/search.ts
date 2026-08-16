@@ -5,7 +5,14 @@ import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import db from "#/lib/db.server";
 import { apiLogger } from "#/lib/logger.server.ts";
 import { embed } from "#/utils/embedding.server";
-import { PAGE_SIZE, toAPIManga, parsePage } from "#/utils/api.server.ts";
+import { Genre, Status } from "#/utils/types.ts";
+import {
+  PAGE_SIZE,
+  parseGenre,
+  parsePage,
+  parseStatus,
+  toAPIManga,
+} from "#/utils/api.server.ts";
 
 export const Route = createFileRoute("/api/search")({
   server: {
@@ -19,6 +26,8 @@ export const Route = createFileRoute("/api/search")({
           throw new Response("Missing search query", { status: 400 });
         }
         const page = parsePage(params.get("page"));
+        const genre = parseGenre(params.get("genre"));
+        const status = parseStatus(params.get("status"));
 
         let searchEmbedding: number[] | null = null;
         try {
@@ -29,6 +38,11 @@ export const Route = createFileRoute("/api/search")({
 
         const rows = await db.query.manga.findMany({
           columns: { id: true, title: true, status: true },
+          where: {
+            status: status !== Status.Any ? status : undefined,
+            genres:
+              genre !== Genre.All ? { arrayContains: [genre] } : undefined,
+          },
           with: {
             cover: { columns: { id: true } },
             chapterGroups: {

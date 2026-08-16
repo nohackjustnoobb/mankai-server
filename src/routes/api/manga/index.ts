@@ -5,31 +5,12 @@ import db from "#/lib/db.server";
 import { Genre, Status } from "#/utils/types.ts";
 import {
   PAGE_SIZE,
+  parseGenre,
   toAPIManga,
   parsePage,
+  parseStatus,
   type APIManga,
 } from "#/utils/api.server.ts";
-
-const GENRE_VALUES = new Set<string>(Object.values(Genre));
-const STATUS_VALUES = new Set<number>(
-  Object.values(Status).filter((v): v is number => typeof v === "number"),
-);
-
-function parseGenre(value: string | null): Genre {
-  const g = (value ?? Genre.All) as Genre;
-  if (!GENRE_VALUES.has(g)) {
-    throw new Response("Invalid genre", { status: 400 });
-  }
-  return g;
-}
-
-function parseStatus(value: string | null): Status {
-  const n = Number(value ?? Status.Any);
-  if (!Number.isInteger(n) || !STATUS_VALUES.has(n)) {
-    throw new Response("Invalid status", { status: 400 });
-  }
-  return n as Status;
-}
 
 export const Route = createFileRoute("/api/manga/")({
   server: {

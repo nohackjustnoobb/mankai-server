@@ -3,6 +3,11 @@ import { Genre, ReadingDirection, Status } from "#/utils/types.ts";
 export const DEFAULT_PAGE = 1;
 export const PAGE_SIZE = 25;
 
+const GENRE_VALUES = new Set<string>(Object.values(Genre));
+const STATUS_VALUES = new Set<number>(
+  Object.values(Status).filter((v): v is number => typeof v === "number"),
+);
+
 export interface APIChapter {
   id: string;
   title?: string;
@@ -69,4 +74,20 @@ export function parsePage(value: string | null): number {
     throw new Response("Invalid page", { status: 400 });
   }
   return n;
+}
+
+export function parseGenre(value: string | null): Genre {
+  const genre = (value ?? Genre.All) as Genre;
+  if (!GENRE_VALUES.has(genre)) {
+    throw new Response("Invalid genre", { status: 400 });
+  }
+  return genre;
+}
+
+export function parseStatus(value: string | null): Status {
+  const status = Number(value ?? Status.Any);
+  if (!Number.isInteger(status) || !STATUS_VALUES.has(status)) {
+    throw new Response("Invalid status", { status: 400 });
+  }
+  return status as Status;
 }
