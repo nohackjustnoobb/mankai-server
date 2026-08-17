@@ -177,7 +177,7 @@ export default class MhrTracker extends Tracker {
       id: data.mangaId.toString(),
       title: s2t(data.mangaName),
       cover: data.mangaPicimageUrl ?? data.mangaCoverimageUrl,
-      status: data.mangaIsOver ? Status.Ended : Status.OnGoing,
+      status: data.mangaIsOver ? Status.Completed : Status.OnGoing,
       readingDirection: ReadingDirection.RightToLeft,
       description: s2t(data.mangaIntro),
       updatedAt: Date.parse(`${data.mangaNewestTime.replace(" ", "T")}+08:00`),

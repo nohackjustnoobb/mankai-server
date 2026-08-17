@@ -240,7 +240,7 @@ function parseMhgManga(id: string, html: string): TrackerManga {
   const rewriter = new HTMLRewriter();
   let foundBookCover = false;
   let coverImage: { alt?: string; src?: string } | undefined;
-  let ended = false;
+  let completed = false;
   let viewstate: string | undefined;
 
   rewriter.on("div.book-cover", {
@@ -261,7 +261,7 @@ function parseMhgManga(id: string, html: string): TrackerManga {
   });
   rewriter.on("div.book-cover span.finish", {
     element() {
-      ended = true;
+      completed = true;
     },
   });
   rewriter.on("#__VIEWSTATE", {
@@ -336,7 +336,7 @@ function parseMhgManga(id: string, html: string): TrackerManga {
     id,
     title,
     cover,
-    status: ended ? Status.Ended : Status.OnGoing,
+    status: completed ? Status.Completed : Status.OnGoing,
     authors,
     genres,
     chapters,

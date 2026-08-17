@@ -54,13 +54,13 @@ export const CREATE_GENRE_OPTIONS: { value: CreateGenre; label: string }[] =
 export enum Status {
   Any = 0,
   OnGoing = 1,
-  Ended = 2,
+  Completed = 2,
 }
 
 export const STATUS_OPTIONS: { value: Status; label: string }[] = [
   { value: Status.Any, label: "Any" },
   { value: Status.OnGoing, label: "Ongoing" },
-  { value: Status.Ended, label: "Ended" },
+  { value: Status.Completed, label: "Completed" },
 ];
 
 export type CreateStatus = Exclude<Status, Status.Any>;
