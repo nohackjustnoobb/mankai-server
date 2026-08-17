@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { cosineDistance } from "drizzle-orm";
+import { cosineDistance, sql } from "drizzle-orm";
 
 import { apiAuthMiddleware } from "#/middleware/auth.ts";
 import db from "#/lib/db.server";
@@ -28,12 +28,16 @@ export const Route = createFileRoute("/api/search")({
         const page = parsePage(params.get("page"));
         const genre = parseGenre(params.get("genre"));
         const status = parseStatus(params.get("status"));
+        const isAuthor = params.get("isAuthor") === "true";
+        const searchPattern = `%${search}%`;
 
         let searchEmbedding: number[] | null = null;
-        try {
-          searchEmbedding = await embed(search);
-        } catch (err) {
-          apiLogger.warn({ err }, "failed to embed search query");
+        if (!isAuthor) {
+          try {
+            searchEmbedding = await embed(search);
+          } catch (err) {
+            apiLogger.warn({ err }, "failed to embed search query");
+          }
         }
 
         const rows = await db.query.manga.findMany({
@@ -42,6 +46,14 @@ export const Route = createFileRoute("/api/search")({
             status: status !== Status.Any ? status : undefined,
             genres:
               genre !== Genre.All ? { arrayContains: [genre] } : undefined,
+            RAW: isAuthor
+              ? (manga) =>
+                  sql`EXISTS (
+                    SELECT 1
+                    FROM unnest(${manga.authors}) AS author
+                    WHERE author ILIKE ${searchPattern}
+                  )`
+              : undefined,
           },
           with: {
             cover: { columns: { id: true } },
