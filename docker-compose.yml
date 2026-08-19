@@ -29,6 +29,7 @@ services:
       EMBEDDING_CACHE_DIR: /app/data/transformers-cache
       USE_PGLITE: "0"
       DATABASE_URL: postgresql://mankai:mankai@postgres:5432/mankai
+      SERVER_ID: mankai-server
       SESSION_SECRET: changeme123-make-sure-it-is-at-least-32-characters
       JWT_SECRET: changeme123-make-sure-it-is-at-least-32-characters
       ADMIN_EMAIL: admin@mankai.local

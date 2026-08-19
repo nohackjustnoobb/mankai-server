@@ -23,6 +23,7 @@ Point the Mankai app at `http://<host>:3000/api`, sign in, and your library and 
 environment:
   SESSION_SECRET: changeme123-make-sure-it-is-at-least-32-characters
   JWT_SECRET: changeme123-make-sure-it-is-at-least-32-characters
+  SERVER_ID: mankai-server
   ADMIN_EMAIL: admin@mankai.local
   ADMIN_PASSWORD: changeme123
   # BASE_API_URL: https://api.example.app

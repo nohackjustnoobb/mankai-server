@@ -6,7 +6,7 @@ export const Route = createFileRoute("/api/")({
     handlers: {
       GET: () => {
         const response = {
-          id: "mankai-server",
+          id: process.env.SERVER_ID?.trim() || "mankai-server",
           authenticationEnabled: true,
           editorEnabled: true,
           name: "Mankai Server",
